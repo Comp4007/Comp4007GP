@@ -19,7 +19,7 @@ public class Kiosk extends AppThread {
 	
     public Kiosk(String id, Building building) {
     	super(id, building);
-    	
+    	koiskCount++;
 //    	for(int i = 0; i < Elevator.elevatorCount; i++){
 //    		ElevatorMBox.add(building.getThread("e" + i).getMBox());
 //    	}//for communication with elevator
@@ -35,6 +35,7 @@ public class Kiosk extends AppThread {
     		//update GUI
     	}else{
     		queue.put(target, elevatorID);
+    		log.info("Floor" + target + "request added to elevator" + elevatorID);
     		//update GUI
     	}
     }
