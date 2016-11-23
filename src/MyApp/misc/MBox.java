@@ -16,44 +16,44 @@ public class MBox {
     //------------------------------------------------------------
     // MBox
     public MBox(String id, Logger log) {
-        this.id = id;
-        this.log = log;
+	this.id = id;
+	this.log = log;
     } // MBox
 
 
     //------------------------------------------------------------
     // send
     public final synchronized void send(Msg msg) {
-        msgCnt++;
-        mqueue.add(msg);
-        log.fine(id + ": send \"" + msg + "\"");
-        notify();
+	msgCnt++;
+	mqueue.add(msg);
+	log.fine(id + ": send \"" + msg + "\"");
+	notify();
     } // send
 
 
     //------------------------------------------------------------
     // receive
     public final synchronized Msg receive() {
-        // wait if message queue is empty
-        if (--msgCnt < 0) {
-            while (true) {
-                try {
+	// wait if message queue is empty
+	if (--msgCnt < 0) {
+	    while (true) {
+		try {
+	
+		    wait();
+		    break;
+		} catch (InterruptedException e) {
+		    log.warning(id + ".receive: InterruptedException");
 
-                    wait();
-                    break;
-                } catch (InterruptedException e) {
-                    log.warning(id + ".receive: InterruptedException");
+		    if (msgCnt >= 0)
+			break;		// msg arrived already
+		    else
+			continue;	// no msg yet, continue waiting
+		}
+	    }
+	}
 
-                    if (msgCnt >= 0)
-                        break;        // msg arrived already
-                    else
-                        continue;    // no msg yet, continue waiting
-                }
-            }
-        }
-
-        Msg msg = mqueue.remove(0);
-        log.fine(id + ": receiveing \"" + msg + "\"");
-        return msg;
+	Msg msg = mqueue.remove(0);
+	log.fine(id + ": receiveing \"" + msg + "\"");
+	return msg;
     } // receive
 } // MBox
