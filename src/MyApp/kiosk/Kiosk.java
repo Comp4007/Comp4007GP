@@ -13,16 +13,13 @@ import MyApp.elevator.Elevator;
 
 public class Kiosk extends AppThread {
 	public static int koiskCount = 0;
-	//private ArrayList<MBox> elevatorMBox;
 	private JFrame Panel;
-	//private String floor;
+	private int floor;
 	
     public Kiosk(String id, Building building) {
     	super(id, building);
+    	this.floor = koiskCount;
     	koiskCount++;
-//    	for(int i = 0; i < Elevator.elevatorCount; i++){
-//    		ElevatorMBox.add(building.getThread("e" + i).getMBox());
-//    	}//for communication with elevator
     	
     	Panel = new JFrame("uiui");
     }
