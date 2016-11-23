@@ -147,7 +147,7 @@ public class Building {
     	for(int i = 0; i < Elevator.elevatorCount; i++){
     		Hashtable<Integer, String> rq =  this.getThread("e" + i).getQueue();
     		
-    		 gr += "Elevator "+i+ ": " + rq +"\n";
+    		geq += "Elevator "+i+ ": " + rq +"\n";
     	}
     	return geq;
     }
@@ -178,7 +178,7 @@ public class Building {
     		Hashtable<Integer, String> rq =  this.getThread("k" + i).getQueue();
     		//demo of how to get queue of kiosk, 
     		//can also use this to get queue of elevator
-    		 gr += "Floor "+i+ ": " + rq +"\n";
+    		gkq += "Floor "+i+ ": " + rq +"\n";
     	}
     	
     	//ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
