@@ -15,6 +15,7 @@ public class Elevator extends AppThread {
     private ArrayList<MBox> kioskMBox;
     private double height;
     private double velocity;
+    private ElevatorStatus status;
     //private String id;
 
     public Elevator(String id, Building building) {

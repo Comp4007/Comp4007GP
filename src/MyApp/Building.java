@@ -14,19 +14,30 @@ import java.util.Hashtable;
 import MyApp.elevator.*;
 import MyApp.kiosk.*;
 import MyApp.misc.*;
+import MyApp.panel.AdminPanel;
+import MyApp.panel.ControlPanel;
+import MyApp.panel.Panel;
 import MyApp.timer.*;
 
 //======================================================================
 // AppKickstarter
 public class Building {
+	/**
+	 * This is config file path 
+	 */
     private final String cfgFName = "etc/MyApp.cfg";
     private Logger log = null;
+    /**
+	 * <Thread ID, Thread object>
+	 */
     private Hashtable<String, AppThread> appThreads = null;
     private Properties cfgProps = null;
 
     //------------------------------------------------------------
     // main
     public static void main(String args[]) {
+    	Panel window = new AdminPanel();
+		window.showInfo();
     	Building building = new Building();
     	building.startApp();
     } // main
@@ -64,14 +75,23 @@ public class Building {
     // startApp
     public void startApp() {
 		// create threads
+    	/**
+    	 * This is for elevator use  implement by steven and kers
+    	 */
 		Timer timer = new Timer("timer", this);
 		
+		/**
+    	 * Create Kiosks  k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
+    	 */
 		Kiosk.koiskCount = new Integer(this.getProperty("Kiosks"));
 		for(int i = 0; i < Kiosk.koiskCount; i ++){
 			Kiosk kiosk = new Kiosk("k" + i, this);
 			new Thread(kiosk).start();
 		}
 		
+		/**
+    	 * Create elevator  e0 = elevator 1, e1 = elevator 2 ......
+    	 */
 		Elevator.elevatorCount = new Integer(this.getProperty("Elevators"));
 		for(int i = 0; i < Elevator.elevatorCount; i ++){
 			Elevator elevator = new Elevator("e" + i, this);
@@ -79,8 +99,16 @@ public class Building {
 		}
 		// start threads
 		
-		
+		/**
+    	 * This is for elevator use  implement by steven and kers
+    	 */
 		new Thread(timer).start();
+		
+		/**
+    	 * Wait all the thread object created. Then open control panel GUI
+    	 */
+		Panel cp = new ControlPanel(this);
+		cp.showInfo();
 	    } // startApp
 	
 	
@@ -91,13 +119,20 @@ public class Building {
     } // getLogger
 
 
+	/**
+     * Kiosk and elevator are appThread object. When they create, they will add into this method.
+     * This method is for Building getThread(String id){}
+     */
     //------------------------------------------------------------
     // regThread
     public void regThread(AppThread appThread) {
     	appThreads.put(appThread.getID(), appThread);
     } // regThread
 
-
+    /**
+     * This method is for getting the specify thread. Also get the thread's attribute
+     * E.G. Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus() => get the e1(Elevator 2) status
+     */
     //------------------------------------------------------------
     
     // getThread
@@ -117,7 +152,9 @@ public class Building {
     	return geq;
     }
 
-
+    /**
+     * Get config file key value pair
+     */
     //------------------------------------------------------------
     // getProperty
     public String getProperty(String property) {
@@ -127,7 +164,7 @@ public class Building {
     public ArrayList<ElevatorStatus> getElevatorStatus(){
     	ArrayList<ElevatorStatus> es = null;
     	for(int i = 0; i < Elevator.elevatorCount; i++){
-    		es.add(((Elevator)(this.getThread("e" + 1))).getStatus());
+    		es.add(((Elevator)(this.getThread("e" + i))).getStatus());
     	}
     	
     	return es;
