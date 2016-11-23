@@ -99,10 +99,23 @@ public class Building {
 
 
     //------------------------------------------------------------
+    
     // getThread
     public AppThread getThread(String id) {
     	return appThreads.get(id);
     } // getThread
+    
+    //getElevatorQueue()
+    public String getElevatorQueue(){
+    	String geq = "";
+    
+    	for(int i = 0; i < Elevator.elevatorCount; i++){
+    		Hashtable<Integer, String> rq =  this.getThread("e" + i).getQueue();
+    		
+    		 gr += "Elevator "+i+ ": " + rq +"\n";
+    	}
+    	return geq;
+    }
 
 
     //------------------------------------------------------------
@@ -120,6 +133,24 @@ public class Building {
     	return es;
     }
     
+    //get result for controlpanel
+    public String getKioskQueue(){
+    	String gkq = "";
+    	
+    	for(int i = 0; i < Kiosk.koiskCount; i++){
+    		Hashtable<Integer, String> rq =  this.getThread("k" + i).getQueue();
+    		//demo of how to get queue of kiosk, 
+    		//can also use this to get queue of elevator
+    		 gr += "Floor "+i+ ": " + rq +"\n";
+    	}
+    	
+    	//ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
+    	//Algorithm stuff
+    	
+    	return gkq;
+    }
+    
+    //get result for kiosk
     public String getResult(int floor, String id){
     	
     	for(int i = 0; i < Kiosk.koiskCount; i++){
