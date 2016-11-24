@@ -7,7 +7,10 @@ import java.util.ArrayList;
 // 第 15 章 執行緒（Thread）
 // https://github.com/JustinSDK/JavaSE6Tutorial/blob/master/docs/CH15.md
 
-//======================================================================
+// 我覺得呢個只係 Joe Sir 想話俾我哋聽 `synchronized` 呢個 reserved 嘅運作係點嘅例子咁解，唔一定要我哋用
+// -- Charles
+
+// ======================================================================
 // MBox
 public class MBox {
     private String id;
@@ -15,14 +18,12 @@ public class MBox {
     private ArrayList<Msg> mqueue = new ArrayList<Msg>();
     private int msgCnt = 0;
 
-
     //------------------------------------------------------------
     // MBox
     public MBox(String id, Logger log) {
 	this.id = id;
 	this.log = log;
     } // MBox
-
 
     //------------------------------------------------------------
     // send
@@ -32,7 +33,6 @@ public class MBox {
 	log.fine(id + ": send \"" + msg + "\"");
 	notify();
     } // send
-
 
     //------------------------------------------------------------
     // receive
