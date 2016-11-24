@@ -11,22 +11,19 @@ import java.awt.GridBagConstraints;
 import javax.swing.JComboBox;
 import java.awt.Insets;
 import javax.swing.DefaultComboBoxModel;
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.UIManager;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 public class KioskPanel {
 	private String keypadText = "";
 	private String infoText = "";	
-	private JFrame frame;
+	private JFrame frmKioskpanel;
 	private JTextField keypadDispaly;
 	private JTextField infoDisplay;
+	Kiosk[] koisks = new Kiosk[10];
 
 	/**
 	 * Launch the application.
@@ -36,7 +33,7 @@ public class KioskPanel {
 			public void run() {
 				try {
 					KioskPanel window = new KioskPanel();
-					window.frame.setVisible(true);
+					window.frmKioskpanel.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -55,12 +52,13 @@ public class KioskPanel {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 507, 323);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmKioskpanel = new JFrame();
+		frmKioskpanel.setTitle("KioskPanel");
+		frmKioskpanel.setBounds(100, 100, 507, 323);
+		frmKioskpanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
-		frame.getContentPane().add(panel, BorderLayout.CENTER);
+		frmKioskpanel.getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{70, 67, 68, 0, 0};
 		gbl_panel.rowHeights = new int[]{23, 39, 19, 0, 0, 0, 0, 0};
