@@ -99,8 +99,8 @@ public class Building {
         /**
          * Create Kiosks  k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
          */
-        Kiosk.koiskCount = new Integer(this.getProperty("Kiosks"));
-        for (int i = 0; i < Kiosk.koiskCount; i++) {
+        int kc = new Integer(this.getProperty("Kiosks"));
+        for (int i = 0; i < kc; i++) {
             Kiosk kiosk = new Kiosk("k" + i, this);
             new Thread(kiosk).start();
         }
@@ -108,8 +108,8 @@ public class Building {
         /**
          * Create elevator  e0 = elevator 1, e1 = elevator 2 ......
          */
-        Elevator.elevatorCount = new Integer(this.getProperty("Elevators"));
-        for (int i = 0; i < Elevator.elevatorCount; i++) {
+        int e = new Integer(this.getProperty("Elevators"));
+        for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
             new Thread(elevator).start();
         }
@@ -163,6 +163,36 @@ public class Building {
     public String getProperty(String property) {
         return cfgProps.getProperty(property);
     } // getThread
+
+    //getElevatorQueue()
+    public String getElevatorQueue(){
+        String geq = "";
+    
+        for(int i = 0; i < Elevator.elevatorCount; i++){
+            Hashtable<Integer, String> rq =  this.getThread("e" + i).getQueue();
+            
+             geq+= "Elevator "+i+ ": " + rq +"\n";
+        }
+        return geq;
+    }
+
+
+ //get result for controlpanel
+    public String getKioskQueue(){
+        String gkq = "";
+        
+        for(int i = 0; i < Kiosk.koiskCount; i++){
+            Hashtable<Integer, String> rq =  this.getThread("k" + i).getQueue();
+            //demo of how to get queue of kiosk, 
+            //can also use this to get queue of elevator
+             gkq+= "Floor "+i+ ": " + rq +"\n";
+        }
+        
+        //ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
+        //Algorithm stuff
+        
+        return gkq;
+    }
 
     public ArrayList<ElevatorStatus> getElevatorStatus() {
         ArrayList<ElevatorStatus> es = null;
