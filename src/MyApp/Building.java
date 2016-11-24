@@ -138,7 +138,6 @@ public class Building {
     public AppThread getThread(String id) {
     	return appThreads.get(id);
     } // getThread
-<<<<<<< HEAD
     
     //getElevatorQueue()
     public String getElevatorQueue(){
@@ -151,8 +150,6 @@ public class Building {
     	}
     	return geq;
     }
-=======
->>>>>>> refs/remotes/origin/master
 
     /**
      * Get config file key value pair
@@ -172,7 +169,6 @@ public class Building {
     	return es;
     }
     
-<<<<<<< HEAD
     //get result for controlpanel
     public String getKioskQueue(){
     	String gkq = "";
@@ -191,8 +187,7 @@ public class Building {
     }
     
     //get result for kiosk
-=======
->>>>>>> refs/remotes/origin/master
+
     public String getResult(int floor, String id){
     	
     	for(int i = 0; i < Kiosk.koiskCount; i++){
