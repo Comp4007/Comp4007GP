@@ -60,7 +60,7 @@ public class AdminPanel implements Panel{
 		table = new JTable();
 
 		// create a table model and set a Column Identifiers to this model 
-        Object[] columns = {"Id","First Name","Last Name","Age"};
+        Object[] columns = {"Id","Floor","First Name","Last Name"};
         DefaultTableModel model = new DefaultTableModel();
         model.setColumnIdentifiers(columns);
         
@@ -115,15 +115,15 @@ public class AdminPanel implements Panel{
         lblId.setBounds(383, 49, 61, 16);
         frame.getContentPane().add(lblId);
         
-        JLabel lblNewLabel = new JLabel("FName:");
+        JLabel lblNewLabel = new JLabel("Floor:");
         lblNewLabel.setBounds(383, 107, 61, 16);
         frame.getContentPane().add(lblNewLabel);
         
-        JLabel lblNewLabel_1 = new JLabel("LName:");
+        JLabel lblNewLabel_1 = new JLabel("FName:");
         lblNewLabel_1.setBounds(383, 165, 61, 16);
         frame.getContentPane().add(lblNewLabel_1);
         
-        JLabel lblNewLabel_2 = new JLabel("Age:");
+        JLabel lblNewLabel_2 = new JLabel("LName:");
         lblNewLabel_2.setBounds(383, 239, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
