@@ -58,7 +58,7 @@ public class Building {
         window.showInfo();
         Building building = new Building();
         building.startApp();
-    } // main
+    }
 
     /**
      * Initialisation of the Building simulation element. <br/>
@@ -87,31 +87,23 @@ public class Building {
         log.addHandler(conHd);
         log.setLevel(Level.INFO);
         appThreads = new Hashtable<String, AppThread>();
-    } // AppKickstarter
-
+    }
 
     /**
      * Start running up the world of the simulation.
      */
     public void startApp() {
-        // create threads
-        /**
-         * This is for elevator use  implement by steven and kers
-         */
+        // This is for elevator use  implement by steven and kers
         Timer timer = new Timer("timer", this);
 
-        /**
-         * Create Kiosks  k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
-         */
+        // Create Kiosks  k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
         int kc = new Integer(this.getProperty("Kiosks"));
         for (int i = 0; i < kc; i++) {
             Kiosk kiosk = new Kiosk("k" + i, this);
             new Thread(kiosk).start();
         }
 
-        /**
-         * Create elevator  e0 = elevator 1, e1 = elevator 2 ......
-         */
+        // Create elevator  e0 = elevator 1, e1 = elevator 2 ......
         int e = new Integer(this.getProperty("Elevators"));
         for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
@@ -119,18 +111,13 @@ public class Building {
         }
         // start threads
 
-        /**
-         * This is for elevator use  implement by steven and kers
-         */
+        // This is for elevator use  implement by steven and kers
         new Thread(timer).start();
 
-        /**
-         * Wait all the thread object created. Then open control panel GUI
-         */
+        // Wait all the thread object created. Then open control panel GUI
         Panel cp = new ControlPanel(this);
         cp.showInfo();
     }
-
 
     /**
      * Retrieves the Logger module for recording.
@@ -138,8 +125,7 @@ public class Building {
      */
     public Logger getLogger() {
         return log;
-    } // getLogger
-
+    }
 
     /**
      * Kiosk and elevator are appThread object. When they create, they will add into this method.
@@ -147,16 +133,16 @@ public class Building {
      */
     public void regThread(AppThread appThread) {
         appThreads.put(appThread.getID(), appThread);
-    } // regThread
+    }
 
     /**
-     * This method is for getting the specify thread. Also get the thread's attribute
-     * E.G. Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus() => get the e1(Elevator 2) status
+     * Getting the specify thread. Also get the thread's attribute.
+     * E.g.: <code>Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus()</code> → get the e1(Elevator 2) status
      * @param id The element identifier for the simulation object.
      */
     public AppThread getThread(String id) {
         return appThreads.get(id);
-    } // getThread
+    }
 
     /**
      * Get config file key value pair
@@ -165,9 +151,13 @@ public class Building {
      */
     public String getProperty(String property) {
         return cfgProps.getProperty(property);
-    } // getThread
+    }
 
-    //getElevatorQueue()
+    /**
+     * Returns the status of elevators queues in a textual format for user to see.
+     * @return A string representation of the status of the elevators queues.
+     * @see ControlPanel
+     */
     public String getElevatorQueue(){
         String geq = "";
     
@@ -189,13 +179,13 @@ public class Building {
         
         for(int i = 0; i < Kiosk.koiskCount; i++){
             HashMap<Integer, String> rq =  this.getThread("k" + i).getQueue();
-            //demo of how to get queue of kiosk, 
-            //can also use this to get queue of elevator
+            // demo of how to get queue of kiosk, 
+            // can also use this to get queue of elevator
              gkq+= "Floor "+i+ ": " + rq +"\n";
         }
         
-        //ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
-        //Algorithm stuff
+        // ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
+        // Algorithm stuff
         
         return gkq;
     }
@@ -218,13 +208,13 @@ public class Building {
     public String getResult(int floor, String id) {
         for (int i = 0; i < Kiosk.koiskCount; i++) {
             HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
-            //demo of how to get queue of kiosk,
-            //can also use this to get queue of elevator
+            // demo of how to get queue of kiosk,
+            // can also use this to get queue of elevator
         }
 
-        //ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
-        //Algorithm stuff
+        // ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
+        // Algorithm stuff
 
-        return "";//for duplicated request
+        return ""; // for duplicated request
     }
 }
