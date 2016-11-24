@@ -50,8 +50,9 @@ public class Building {
      */
     private final Hashtable<String, Integer> floorPositions = null;
 
-    //------------------------------------------------------------
-    // main
+    /**
+     * Java.exe entry point for loading up the Building simulation element.
+     */
     public static void main(String args[]) {
         Panel window = new AdminPanel();
         window.showInfo();
@@ -59,9 +60,10 @@ public class Building {
         building.startApp();
     } // main
 
-
-    //------------------------------------------------------------
-    // AppKickstarter
+    /**
+     * Initialisation of the Building simulation element. <br/>
+     * It will also instantiate all lifts, kiosks, control panels and other related stuffs.
+     */
     public Building() {
         // read system config from property file
         try {
@@ -88,8 +90,9 @@ public class Building {
     } // AppKickstarter
 
 
-    //------------------------------------------------------------
-    // startApp
+    /**
+     * Start running up the world of the simulation.
+     */
     public void startApp() {
         // create threads
         /**
@@ -126,11 +129,13 @@ public class Building {
          */
         Panel cp = new ControlPanel(this);
         cp.showInfo();
-    } // startApp
+    }
 
 
-    //------------------------------------------------------------
-    // getLogger
+    /**
+     * Retrieves the Logger module for recording.
+     * @return The Logger moudle.
+     */
     public Logger getLogger() {
         return log;
     } // getLogger
@@ -140,8 +145,6 @@ public class Building {
      * Kiosk and elevator are appThread object. When they create, they will add into this method.
      * This method is for Building getThread(String id){}
      */
-    //------------------------------------------------------------
-    // regThread
     public void regThread(AppThread appThread) {
         appThreads.put(appThread.getID(), appThread);
     } // regThread
@@ -149,18 +152,17 @@ public class Building {
     /**
      * This method is for getting the specify thread. Also get the thread's attribute
      * E.G. Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus() => get the e1(Elevator 2) status
+     * @param id The element identifier for the simulation object.
      */
-    //------------------------------------------------------------
-    // getThread
     public AppThread getThread(String id) {
         return appThreads.get(id);
     } // getThread
 
     /**
      * Get config file key value pair
+     * @param property Key of the configuration property.
+     * @return The value of the specified configuration property.
      */
-    //------------------------------------------------------------
-    // getProperty
     public String getProperty(String property) {
         return cfgProps.getProperty(property);
     } // getThread
@@ -177,8 +179,11 @@ public class Building {
         return geq;
     }
 
-
- //get result for controlpanel
+    /**
+     * Returns the status of kiosk queue in a textual format for user to see.
+     * @return A string representation of the status of the kiosk queue.
+     * @see ControlPanel
+     */
     public String getKioskQueue(){
         String gkq = "";
         
@@ -195,6 +200,10 @@ public class Building {
         return gkq;
     }
 
+    /**
+     * Get all statuses of different elevators accordingly.
+     * @return An array list of elevator statuses.
+     */
     public ArrayList<ElevatorStatus> getElevatorStatus() {
         ArrayList<ElevatorStatus> es = null;
         for (int i = 0; i < Elevator.elevatorCount; i++) {
@@ -204,8 +213,9 @@ public class Building {
         return es;
     }
 
+    // TODO: Removing this method. Consider using push-in-push-out method to control the next hop of different elevators.
+    @Deprecated
     public String getResult(int floor, String id) {
-
         for (int i = 0; i < Kiosk.koiskCount; i++) {
             HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
             //demo of how to get queue of kiosk,
@@ -217,4 +227,4 @@ public class Building {
 
         return "";//for duplicated request
     }
-} // AppKickstarter
+}
