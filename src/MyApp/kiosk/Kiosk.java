@@ -3,6 +3,7 @@ package MyApp.kiosk;
 import MyApp.misc.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.swing.JFrame;
@@ -46,7 +47,7 @@ public class Kiosk extends AppThread {
     	addRequest(id);//dummy
     }
     
-    public Hashtable<Integer, String> getQueue(){
+    public HashMap<Integer, String> getQueue(){
     	return queue;
     }
     

@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import MyApp.elevator.*;
@@ -169,7 +170,7 @@ public class Building {
         String geq = "";
     
         for(int i = 0; i < Elevator.elevatorCount; i++){
-            Hashtable<Integer, String> rq =  this.getThread("e" + i).getQueue();
+            HashMap<Integer, String> rq =  this.getThread("e" + i).getQueue();
             
              geq+= "Elevator "+i+ ": " + rq +"\n";
         }
@@ -182,7 +183,7 @@ public class Building {
         String gkq = "";
         
         for(int i = 0; i < Kiosk.koiskCount; i++){
-            Hashtable<Integer, String> rq =  this.getThread("k" + i).getQueue();
+            HashMap<Integer, String> rq =  this.getThread("k" + i).getQueue();
             //demo of how to get queue of kiosk, 
             //can also use this to get queue of elevator
              gkq+= "Floor "+i+ ": " + rq +"\n";
@@ -206,7 +207,7 @@ public class Building {
     public String getResult(int floor, String id) {
 
         for (int i = 0; i < Kiosk.koiskCount; i++) {
-            Hashtable<Integer, String> rq = this.getThread("k" + i).getQueue();
+            HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
             //demo of how to get queue of kiosk,
             //can also use this to get queue of elevator
         }
