@@ -193,4 +193,11 @@ public class Elevator extends AppThread {
 	System.out.println(id + ": Terminating This Lift!");
 	System.exit(0);
     } // run
+
+	// TODO: JavaDoc for buildingPushNewDestination(String)
+	protected final synchronized boolean buildingPushNewDestination(String floorName) {
+		// TODO: what do you do when I(Building) gives you new destination?
+		// TODO: return boolean if you may stop there. otherwise I'll assign another lift then -- Charles
+		return true;
+	}
 } // PlayerA
