@@ -3,6 +3,9 @@ package MyApp.misc;
 import java.util.logging.Logger;
 import java.util.ArrayList;
 
+// JavaSE6Tutorial/docs/CH15.md
+// 第 15 章 執行緒（Thread）
+// https://github.com/JustinSDK/JavaSE6Tutorial/blob/master/docs/CH15.md
 
 //======================================================================
 // MBox
