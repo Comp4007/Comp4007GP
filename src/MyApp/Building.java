@@ -4,13 +4,11 @@ import java.lang.Thread;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Properties;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 
 import MyApp.elevator.*;
 import MyApp.kiosk.*;
@@ -18,7 +16,7 @@ import MyApp.misc.*;
 import MyApp.panel.AdminPanel;
 import MyApp.panel.ControlPanel;
 import MyApp.panel.Panel;
-import MyApp.timer.*;
+import MyApp.timer.Timer;
 
 /**
  * Simulates all functionality of a centralised controller inside a building. <br/>
@@ -44,11 +42,12 @@ public class Building {
     /**
      * Indicates the total meters that an Elevator may move vertically for.
      */
-    private final int displacementMeters = 0;
+    private final int displacementMeters;
     /**
      * A dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is.
      */
-    private final Hashtable<String, Integer> floorPositions = null;
+    private final Hashtable<String, Double> floorPositions;
+    private final AtomicReference<Hashtable<String, Double>> arefFloorPositions; // http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
 
     /**
      * Java.exe entry point for loading up the Building simulation element.
@@ -56,7 +55,14 @@ public class Building {
     public static void main(String args[]) {
         Panel window = new AdminPanel();
         window.showInfo();
-        Building building = new Building();
+        Building building;
+        try {
+            building = new Building();
+        } catch (Exception e) {
+            System.out.println("Cannot instantiate Building object:");
+            e.printStackTrace();
+            return;
+        }
         building.startApp();
     }
 
@@ -64,7 +70,7 @@ public class Building {
      * Initialisation of the Building simulation element. <br/>
      * It will also instantiate all lifts, kiosks, control panels and other related stuffs.
      */
-    public Building() {
+    public Building() throws InvalidPropertiesFormatException {
         // read system config from property file
         try {
             cfgProps = new Properties();
@@ -77,6 +83,37 @@ public class Building {
         } catch (IOException e) {
             System.out.println("Error reading config file (" + cfgFName + ").");
             System.exit(-1);
+        }
+
+        // values for final properties
+        if (cfgProps.containsKey("DisplacementMeters"))
+            this.displacementMeters = Integer.parseInt(cfgProps.getProperty("DisplacementMeters"));
+        else
+            throw new InvalidPropertiesFormatException("missing DisplacementMeters");
+
+        {
+            String[] floorNames;
+            if (cfgProps.containsKey("FloorNames"))
+                floorNames = cfgProps.getProperty("FloorNames").split("|");
+            else
+                throw new InvalidPropertiesFormatException("missing FloorNames");
+
+            double[] floorPositions;
+            if (cfgProps.containsKey("FloorPositions"))
+                floorPositions = Arrays.stream(cfgProps.getProperty("FloorPositions").split("|")).mapToDouble(Double::parseDouble).toArray();
+            else
+                throw new InvalidPropertiesFormatException("missing FloorPositions");
+
+            // for key-value pair, asserting array length size is same is required
+            if (floorNames.length != floorPositions.length)
+                throw new InvalidPropertiesFormatException("floorNames.length != floorPositions.length");
+
+            this.floorPositions = new Hashtable<>();
+            for (int i = 0; i < floorNames.length; i++) {
+                this.floorPositions.put(floorNames[i], floorPositions[i]);
+            }
+
+            this.arefFloorPositions = new AtomicReference<>(this.floorPositions);
         }
 
         // get and configure logger
@@ -93,17 +130,17 @@ public class Building {
      * Start running up the world of the simulation.
      */
     public void startApp() {
-        // This is for elevator use  implement by steven and kers
+        // This is for elevator use implement by steven and kers
         Timer timer = new Timer("timer", this);
 
-        // Create Kiosks  k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
+        // Create Kiosks k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
         int kc = new Integer(this.getProperty("Kiosks"));
         for (int i = 0; i < kc; i++) {
             Kiosk kiosk = new Kiosk("k" + i, this);
             new Thread(kiosk).start();
         }
 
-        // Create elevator  e0 = elevator 1, e1 = elevator 2 ......
+        // Create elevator e0 = elevator 1, e1 = elevator 2 ......
         int e = new Integer(this.getProperty("Elevators"));
         for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
@@ -111,7 +148,7 @@ public class Building {
         }
         // start threads
 
-        // This is for elevator use  implement by steven and kers
+        // This is for elevator use implement by steven and kers
         new Thread(timer).start();
 
         // Wait all the thread object created. Then open control panel GUI
@@ -128,16 +165,18 @@ public class Building {
     }
 
     /**
-     * Kiosk and elevator are appThread object. When they create, they will add into this method.
-     * This method is for Building getThread(String id){}
+     * Kiosk and elevator are appThread object. When they create, they will add into this method.<br/>
+     * This method is for <code>Building:getThread(String id)</code>
      */
     public void regThread(AppThread appThread) {
         appThreads.put(appThread.getID(), appThread);
     }
 
     /**
-     * Getting the specify thread. Also get the thread's attribute.
-     * E.g.: <code>Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus()</code> → get the e1(Elevator 2) status
+     * Getting the specify thread. Also get the thread's attribute. <br/>
+     * E.g.:
+     * <code>Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus()</code>
+     * → get the e1(Elevator 2) status
      * @param id The element identifier for the simulation object.
      */
     public AppThread getThread(String id) {
@@ -216,5 +255,29 @@ public class Building {
         // Algorithm stuff
 
         return ""; // for duplicated request
+    }
+
+    /**
+     * Get the total displacement that an elevator may travel for vertically within the building.
+     * @return The displacement, in meters.
+     */
+    public final int getDisplacementMeters() {
+        return displacementMeters;
+    }
+
+    /**
+     * Get an dictionary for all floors, with their names and the displacement that matches the vertical position of the floor.
+     * @return A <code>Hastable</code> object that contains a list of: <br/>
+     * <code>String</code> of the floor name and <br/>
+     * <code>double</code> of the displacement that matches the vertical position of the floor in meters.
+     */
+    public final Hashtable<String, Double> getFloorPositions() {
+        return arefFloorPositions.get();
+    }
+
+    // TODO: JavaDoc for kioskPushNewHopRequest(Kiosk, String)
+    public synchronized void kioskPushNewHopRequest(Kiosk kiosk, String destFloor) {
+        // TODO: you got the source floor and dest floor pair, what to do?
+        // TODO: remember to calculate which lift to catch the request and push back to the lift to update its next destination.
     }
 }
