@@ -1,6 +1,9 @@
 package MyApp.panel;
 
 import MyApp.Building;
+import MyApp.kiosk.KioskPanel;
+
+import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 

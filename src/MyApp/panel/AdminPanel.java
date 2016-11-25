@@ -32,9 +32,7 @@ public class AdminPanel implements Panel{
 	private JFrame frame;
 	private JTable table;
 	private final String dbFName = "etc/RFID_DB";
-	public AdminPanel(){
-		
-	}
+
 	
 	public AdminPanel(String signal){
 		initialize();
@@ -225,7 +223,7 @@ public class AdminPanel implements Panel{
         
         //jframe property
         frame.setTitle("RFID Admin Panel");
-        frame.setSize(650,435);
+        frame.setSize(667,448);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);

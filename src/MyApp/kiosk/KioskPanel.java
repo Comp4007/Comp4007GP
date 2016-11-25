@@ -1,5 +1,6 @@
 package MyApp.kiosk;
 
+import MyApp.Building;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -14,6 +15,9 @@ import javax.swing.DefaultComboBoxModel;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.UIManager;
+
+import MyApp.panel.Panel;
+
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -21,17 +25,19 @@ import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-public class KioskPanel {
+public class KioskPanel implements Panel{
 	private String keypadText = "";
 	private String infoText = "";	
 	private JFrame frame;
 	private JTextField keypadDispaly;
 	private JTextField infoDisplay;
-
+//	private Building building;
+	
 	/**
 	 * Launch the application.
+	 * @return 
 	 */
-	public static void main(String[] args) {
+	public void showInfo() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -43,11 +49,29 @@ public class KioskPanel {
 			}
 		});
 	}
+	
+	 public static void main(String[] args){
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						KioskPanel window = new KioskPanel();
+						window.frame.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+	 }
 
 	/**
 	 * Create the application.
 	 */
 	public KioskPanel() {
+		initialize();
+	}
+	
+	public KioskPanel(Building building) {
+		//this.building = building;
 		initialize();
 	}
 
@@ -62,7 +86,7 @@ public class KioskPanel {
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
 		GridBagLayout gbl_panel = new GridBagLayout();
-		gbl_panel.columnWidths = new int[]{70, 67, 68, 0, 0};
+		gbl_panel.columnWidths = new int[]{83, 83, 91, 0, 0};
 		gbl_panel.rowHeights = new int[]{23, 39, 19, 0, 0, 0, 0, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE};
@@ -76,6 +100,7 @@ public class KioskPanel {
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
+		//floor combobox
 		JComboBox FloorCbx = new JComboBox();
 		FloorCbx.setModel(new DefaultComboBoxModel(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
@@ -86,20 +111,7 @@ public class KioskPanel {
 		gbc_FloorCbx.gridy = 0;
 		panel.add(FloorCbx, gbc_FloorCbx);
 		
-		JButton btn7 = new JButton("7");
-		GridBagConstraints gbc_btn7 = new GridBagConstraints();
-		gbc_btn7.fill = GridBagConstraints.BOTH;
-		gbc_btn7.insets = new Insets(0, 0, 5, 5);
-		gbc_btn7.gridx = 0;
-		gbc_btn7.gridy = 3;
-		btn7.addActionListener(new ActionListener() { 
-		  public void actionPerformed(ActionEvent e) { 
-			  keypadText += 7;
-			  keypadDispaly.setText(keypadText);
-			  } 
-			} );
-		panel.add(btn7, gbc_btn7);
-		
+		//Text field for display keypad result
 		keypadDispaly = new JTextField();
 		keypadDispaly.setHorizontalAlignment(SwingConstants.CENTER);
 		keypadDispaly.setEditable(false);
@@ -112,6 +124,7 @@ public class KioskPanel {
 		panel.add(keypadDispaly, gbc_keypadDispaly);
 		keypadDispaly.setColumns(1);
 		
+		//Text field for display Update form building 
 		infoDisplay = new JTextField();
 		infoDisplay.setEditable(false);
 		GridBagConstraints gbc_infoDisplay = new GridBagConstraints();
@@ -122,42 +135,50 @@ public class KioskPanel {
 		gbc_infoDisplay.gridy = 2;
 		panel.add(infoDisplay, gbc_infoDisplay);
 		infoDisplay.setColumns(1);
-
 		
-		JButton btn8 = new JButton("8");
-		GridBagConstraints gbc_btn8 = new GridBagConstraints();
-		gbc_btn8.fill = GridBagConstraints.BOTH;
-		gbc_btn8.insets = new Insets(0, 0, 5, 5);
-		gbc_btn8.gridx = 1;
-		gbc_btn8.gridy = 3;
-		btn8.addActionListener(new ActionListener() { 
+		//Keypad button
+		//========================================================
+		JButton btn1 = new JButton("1");
+		GridBagConstraints gbc_btn1 = new GridBagConstraints();
+		gbc_btn1.fill = GridBagConstraints.BOTH;
+		gbc_btn1.insets = new Insets(0, 0, 5, 5);
+		gbc_btn1.gridx = 0;
+		gbc_btn1.gridy = 5;
+		btn1.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  keypadText += 8;
+				  keypadText += 1;
 				  keypadDispaly.setText(keypadText);
 				  } 
 				} );
-		panel.add(btn8, gbc_btn8);
+		panel.add(btn1, gbc_btn1);
 		
-		JButton btn9 = new JButton("9");
-		GridBagConstraints gbc_btn9 = new GridBagConstraints();
-		gbc_btn9.fill = GridBagConstraints.BOTH;
-		gbc_btn9.insets = new Insets(0, 0, 5, 5);
-		gbc_btn9.gridx = 2;
-		gbc_btn9.gridy = 3;
-		btn9.addActionListener(new ActionListener() { 
+		JButton btn2 = new JButton("2");
+		GridBagConstraints gbc_btn2 = new GridBagConstraints();
+		gbc_btn2.fill = GridBagConstraints.BOTH;
+		gbc_btn2.insets = new Insets(0, 0, 5, 5);
+		gbc_btn2.gridx = 1;
+		gbc_btn2.gridy = 5;
+		btn2.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  keypadText += 9;
+				  keypadText += 2;
 				  keypadDispaly.setText(keypadText);
 				  } 
 				} );
-		panel.add(btn9, gbc_btn9);
+		panel.add(btn2, gbc_btn2);
 		
-		JLabel lblRfidReader = new JLabel("RFID READER");
-		GridBagConstraints gbc_lblRfidReader = new GridBagConstraints();
-		gbc_lblRfidReader.insets = new Insets(0, 0, 5, 0);
-		gbc_lblRfidReader.gridx = 3;
-		gbc_lblRfidReader.gridy = 3;
-		panel.add(lblRfidReader, gbc_lblRfidReader);
+		JButton btn3 = new JButton("3");
+		GridBagConstraints gbc_btn3 = new GridBagConstraints();
+		gbc_btn3.fill = GridBagConstraints.BOTH;
+		gbc_btn3.insets = new Insets(0, 0, 5, 5);
+		gbc_btn3.gridx = 2;
+		gbc_btn3.gridy = 5;
+		btn3.addActionListener(new ActionListener() { 
+			  public void actionPerformed(ActionEvent e) { 
+				  keypadText += 3;
+				  keypadDispaly.setText(keypadText);
+				  } 
+				} );
+		panel.add(btn3, gbc_btn3);
 		
 		JButton btn4 = new JButton("4");
 		GridBagConstraints gbc_btn4 = new GridBagConstraints();
@@ -201,55 +222,55 @@ public class KioskPanel {
 				} );
 		panel.add(btn6, gbc_btn6);
 		
-		JComboBox RFIDCbx = new JComboBox();
-		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
-		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
-		gbc_RFIDCbx.fill = GridBagConstraints.HORIZONTAL;
-		gbc_RFIDCbx.gridx = 3;
-		gbc_RFIDCbx.gridy = 4;
-		panel.add(RFIDCbx, gbc_RFIDCbx);
+		JButton btn7 = new JButton("7");
+		GridBagConstraints gbc_btn7 = new GridBagConstraints();
+		gbc_btn7.fill = GridBagConstraints.BOTH;
+		gbc_btn7.insets = new Insets(0, 0, 5, 5);
+		gbc_btn7.gridx = 0;
+		gbc_btn7.gridy = 3;
+		btn7.addActionListener(new ActionListener() { 
+		  public void actionPerformed(ActionEvent e) { 
+			  keypadText += 7;
+			  keypadDispaly.setText(keypadText);
+			  } 
+			} );
+		panel.add(btn7, gbc_btn7);
+
 		
-		JButton btn1 = new JButton("1");
-		GridBagConstraints gbc_btn1 = new GridBagConstraints();
-		gbc_btn1.fill = GridBagConstraints.BOTH;
-		gbc_btn1.insets = new Insets(0, 0, 5, 5);
-		gbc_btn1.gridx = 0;
-		gbc_btn1.gridy = 5;
-		btn1.addActionListener(new ActionListener() { 
+		JButton btn8 = new JButton("8");
+		GridBagConstraints gbc_btn8 = new GridBagConstraints();
+		gbc_btn8.fill = GridBagConstraints.BOTH;
+		gbc_btn8.insets = new Insets(0, 0, 5, 5);
+		gbc_btn8.gridx = 1;
+		gbc_btn8.gridy = 3;
+		btn8.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  keypadText += 1;
+				  keypadText += 8;
 				  keypadDispaly.setText(keypadText);
 				  } 
 				} );
-		panel.add(btn1, gbc_btn1);
+		panel.add(btn8, gbc_btn8);
 		
-		JButton btn2 = new JButton("2");
-		GridBagConstraints gbc_btn2 = new GridBagConstraints();
-		gbc_btn2.fill = GridBagConstraints.BOTH;
-		gbc_btn2.insets = new Insets(0, 0, 5, 5);
-		gbc_btn2.gridx = 1;
-		gbc_btn2.gridy = 5;
-		btn2.addActionListener(new ActionListener() { 
+		JButton btn9 = new JButton("9");
+		GridBagConstraints gbc_btn9 = new GridBagConstraints();
+		gbc_btn9.fill = GridBagConstraints.BOTH;
+		gbc_btn9.insets = new Insets(0, 0, 5, 5);
+		gbc_btn9.gridx = 2;
+		gbc_btn9.gridy = 3;
+		btn9.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  keypadText += 2;
+				  keypadText += 9;
 				  keypadDispaly.setText(keypadText);
 				  } 
 				} );
-		panel.add(btn2, gbc_btn2);
+		panel.add(btn9, gbc_btn9);
 		
-		JButton btn3 = new JButton("3");
-		GridBagConstraints gbc_btn3 = new GridBagConstraints();
-		gbc_btn3.fill = GridBagConstraints.BOTH;
-		gbc_btn3.insets = new Insets(0, 0, 5, 5);
-		gbc_btn3.gridx = 2;
-		gbc_btn3.gridy = 5;
-		btn3.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  keypadText += 3;
-				  keypadDispaly.setText(keypadText);
-				  } 
-				} );
-		panel.add(btn3, gbc_btn3);
+		JLabel lblRfidReader = new JLabel("RFID READER");
+		GridBagConstraints gbc_lblRfidReader = new GridBagConstraints();
+		gbc_lblRfidReader.insets = new Insets(0, 0, 5, 0);
+		gbc_lblRfidReader.gridx = 3;
+		gbc_lblRfidReader.gridy = 3;
+		panel.add(lblRfidReader, gbc_lblRfidReader);
 		
 		JButton btnCC = new JButton("C");
 		GridBagConstraints gbc_btnCC = new GridBagConstraints();
@@ -263,14 +284,7 @@ public class KioskPanel {
 				  keypadDispaly.setText(keypadText);
 				  } 
 				} );
-		
-		JButton btnSummit_1 = new JButton("Summit");
-		GridBagConstraints gbc_btnSummit_1 = new GridBagConstraints();
-		gbc_btnSummit_1.insets = new Insets(0, 0, 5, 0);
-		gbc_btnSummit_1.gridx = 3;
-		gbc_btnSummit_1.gridy = 5;
-		panel.add(btnSummit_1, gbc_btnSummit_1);
-		panel.add(btnCC, gbc_btnCC);
+		panel.add(btnCC,gbc_btnCC);
 		
 		JButton btnDelete = new JButton("Del");
 		GridBagConstraints gbc_btnDelete = new GridBagConstraints();
@@ -287,14 +301,36 @@ public class KioskPanel {
 				  } 
 				} );
 		panel.add(btnDelete, gbc_btnDelete);
-		
+
 		JButton btnSummit = new JButton("Summit");
 		GridBagConstraints gbc_btnSummit = new GridBagConstraints();
 		gbc_btnSummit.fill = GridBagConstraints.BOTH;
 		gbc_btnSummit.insets = new Insets(0, 0, 0, 5);
 		gbc_btnSummit.gridx = 2;
 		gbc_btnSummit.gridy = 6;
-		panel.add(btnSummit, gbc_btnSummit);
-	}
+		btnDelete.addActionListener(new ActionListener() { 
+			  public void actionPerformed(ActionEvent e) { 
+				  summitFloor();
+			  }
 
+			private void summitFloor() {
+				// TODO Auto-generated method stub
+				
+			}
+		} );
+		panel.add(btnSummit, gbc_btnSummit);
+		//=================================================================
+		
+		//RFID reader
+		JComboBox RFIDCbx = new JComboBox();
+		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
+		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
+		gbc_RFIDCbx.fill = GridBagConstraints.HORIZONTAL;
+		gbc_RFIDCbx.gridx = 3;
+		gbc_RFIDCbx.gridy = 4;
+		panel.add(RFIDCbx, gbc_RFIDCbx);
+		
+
+	}
+	
 }
