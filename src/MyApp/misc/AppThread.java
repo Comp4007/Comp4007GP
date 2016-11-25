@@ -1,7 +1,6 @@
 package MyApp.misc;
 
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.logging.Logger;
 
 import MyApp.Building;
@@ -29,7 +28,7 @@ public abstract class AppThread implements Runnable {
 		this.building = building;
 		log = building.getLogger();
 		mbox = new MBox(id, log);
-		building.regThread(this);
+		building.putThread(this);
 		queue = new HashMap<Integer, String>();
     } // AppThread
 

@@ -4,7 +4,6 @@ import MyApp.misc.*;
 import MyApp.timer.Timer;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -84,7 +83,7 @@ public class Elevator extends AppThread {
     	 */   	
     	kioskMBox = new ArrayList<MBox>();
     	//this.id = id;
-    	for(int i = 0; i < Kiosk.koiskCount; i++){
+    	for(int i = 0; i < Kiosk.kioskCount; i++){
     		kioskMBox.add(building.getThread("k" + i).getMBox());
     	}//for communication with kiosk
     	/**
