@@ -1,6 +1,8 @@
 package MyApp.kiosk;
 
 import MyApp.Building;
+import MyApp.Floor;
+
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -20,6 +22,8 @@ import MyApp.panel.Panel;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.SystemColor;
 import javax.swing.JTextField;
@@ -31,8 +35,8 @@ public class KioskPanel implements Panel{
 	private JFrame frame;
 	private JTextField keypadDispaly;
 	private JTextField infoDisplay;
-//	private Building building;
-	
+	private Building building;
+	private String[] floorList;
 
 	public void showInfo() {
 		EventQueue.invokeLater(new Runnable() {
@@ -46,23 +50,6 @@ public class KioskPanel implements Panel{
 			}
 		});
 	}
-	
-	/**
-	 * Launch the application.
-	 * @return 
-	 */
-	 public static void main(String[] args){
-			EventQueue.invokeLater(new Runnable() {
-				public void run() {
-					try {
-						KioskPanel window = new KioskPanel();
-						window.frame.setVisible(true);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
-	 }
 
 	/**
 	 * Create the application.
@@ -72,7 +59,7 @@ public class KioskPanel implements Panel{
 	}
 	
 	public KioskPanel(Building building) {
-		//this.building = building;
+		this.building = building;
 		initialize();
 	}
 
@@ -103,7 +90,7 @@ public class KioskPanel implements Panel{
 		
 		//floor combobox
 		JComboBox FloorCbx = new JComboBox();
-		FloorCbx.setModel(new DefaultComboBoxModel(new String[] {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
+		FloorCbx.setModel(new DefaultComboBoxModel(floorList));
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
 		gbc_FloorCbx.fill = GridBagConstraints.HORIZONTAL;
 		gbc_FloorCbx.gridwidth = 2;
