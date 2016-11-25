@@ -6,8 +6,6 @@ import MyApp.misc.*;
 
 import java.util.HashMap;
 
-import javax.swing.JFrame;
-
 import MyApp.Building;
 
 
@@ -35,7 +33,7 @@ public class Kiosk extends AppThread {
 
         Elevator assignedTo;
         try {
-            assignedTo = this.building.kioskPushNewHopRequest(this, target);
+            assignedTo = this.building.putNewHopRequest(this, target);
         } catch (IndexOutOfBoundsException e) {
             return false;
         }
