@@ -33,9 +33,7 @@ public class AdminPanel implements Panel{
 	private JTable table;
 	private final String dbFName = "etc/RFID_DB";
 
-	public AdminPanel(){
-		initialize();
-	}
+	public AdminPanel(){}
 	
 	/**
 	 * @wbp.parser.constructor
