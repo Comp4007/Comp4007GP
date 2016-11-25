@@ -14,15 +14,12 @@ import MyApp.elevator.Elevator;
 
 public class Kiosk extends AppThread {
 	public static int koiskCount = 0;
-	private JFrame Panel;
 	private int floor;
 	
     public Kiosk(String id, Building building) {
     	super(id, building);
     	this.floor = koiskCount;
     	koiskCount++;
-    	
-    	Panel = new JFrame("uiui");
     }
 
     

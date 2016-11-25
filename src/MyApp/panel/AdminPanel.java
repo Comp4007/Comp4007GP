@@ -28,6 +28,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JLabel;
 
+
 public class AdminPanel implements Panel{
 	private JFrame frame;
 	private JTable table;
@@ -36,6 +37,9 @@ public class AdminPanel implements Panel{
 		
 	}
 	
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public AdminPanel(String signal){
 		initialize();
 	}
@@ -108,13 +112,13 @@ public class AdminPanel implements Panel{
         textLname.setBounds(516, 160, 100, 25);
         textAge.setBounds(516, 234, 100, 25);
         
-        btnAdd.setBounds(349, 381, 100, 25);
-        btnUpdate.setBounds(449, 381, 100, 25);
-        btnDelete.setBounds(548, 381, 100, 25);
+        btnAdd.setBounds(336, 361, 100, 25);
+        btnUpdate.setBounds(436, 361, 100, 25);
+        btnDelete.setBounds(534, 361, 100, 25);
         
         // create JScrollPane
         JScrollPane pane = new JScrollPane(table);
-        pane.setBounds(0, 0, 348, 412);
+        pane.setBounds(0, 0, 332, 397);
         
         frame.getContentPane().setLayout(null);
         
