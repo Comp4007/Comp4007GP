@@ -1,5 +1,6 @@
 package MyApp.misc;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.logging.Logger;
 
@@ -19,7 +20,7 @@ public abstract class AppThread implements Runnable {
     protected Building building;
     protected MBox mbox = null;
     protected Logger log = null;
-    protected Hashtable<Integer, String> queue;
+    protected HashMap<Integer, String> queue;
 
     //------------------------------------------------------------
     // AppThread
@@ -29,6 +30,7 @@ public abstract class AppThread implements Runnable {
 		log = building.getLogger();
 		mbox = new MBox(id, log);
 		building.regThread(this);
+		queue = new HashMap<Integer, String>();
     } // AppThread
 
 
@@ -39,7 +41,7 @@ public abstract class AppThread implements Runnable {
      * To retrieve the identifier of such object in this respective building.
      */
     public String getID() { return id; }
-    public Hashtable<Integer, String> getQueue() {return queue;}
+    public HashMap<Integer, String> getQueue() {return queue;}
     
     public void setQueue(){
     	
