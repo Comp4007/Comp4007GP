@@ -1,5 +1,6 @@
 package MyApp.elevator;
 
+import MyApp.Floor;
 import MyApp.misc.*;
 import MyApp.timer.Timer;
 
@@ -11,14 +12,17 @@ import MyApp.Building;
 import MyApp.kiosk.Kiosk;
 
 
-public class Elevator extends AppThread {
+public class Elevator extends AppThread implements Comparable<Elevator> {
 	/**
 	 * This is count number of elevator. Also for building getElevatorQueue() to get no. of elevator
 	 */
 	public static int elevatorCount = 0;
+
+    private int elevatorId;
 	/**
 	 * Default setting in config file. Assume each floor has 2.5m
 	 */
+	@Deprecated
 	private double heightOfFloor;
 	/**
 	 * Default setting in config file. Assume the accelation is 5
@@ -90,14 +94,18 @@ public class Elevator extends AppThread {
     	 * Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
     	 */
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
-    	elevatorCount++;
+    	elevatorId = elevatorCount++;
     }
 
     //for the controller to check if an elevator can stop
-    public ElevatorStatus getStatus(){
-    	return new ElevatorStatus(height,velocity,breakDistance,acceleration);
+    public final ElevatorStatus getStatus(){
+    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration);
     }
-    
+
+    public int getElevatorId() {
+        return elevatorId;
+    }
+
     /**
      * When building finish the simulate, the target result will use this method to pass in elvator mission queue
      * @param target
@@ -193,10 +201,21 @@ public class Elevator extends AppThread {
 	System.exit(0);
     } // run
 
-	// TODO: JavaDoc for buildingPushNewDestination(String)
-	protected final synchronized boolean buildingPushNewDestination(String floorName) {
-		// TODO: what do you do when I(Building) gives you new destination?
-		// TODO: return boolean if you may stop there. otherwise I'll assign another lift then -- Charles
-		return true;
+	// TODO: JavaDoc for putNewDestination(String)
+    public final boolean putNewDestination(String floorName) {
+        Floor floor = building.getFloorPosition(floorName);
+        return putNewDestination(floor);
 	}
+
+    // TODO: JavaDoc for putNewDestination(Floor)
+    public final synchronized boolean putNewDestination(Floor floor) {
+        // TODO: what do you do when I(Building) gives you new destination?
+        // TODO: return boolean if you may stop there. otherwise I'll assign another lift then -- Charles
+        return true;
+    }
+
+    @Override
+    public int compareTo(Elevator o) {
+        return this.elevatorId - o.elevatorId;
+    }
 } // PlayerA
