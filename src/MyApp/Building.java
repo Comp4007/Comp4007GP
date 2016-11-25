@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import MyApp.elevator.*;
@@ -22,11 +23,14 @@ import MyApp.timer.Timer;
 
 import static java.util.stream.Collectors.toMap;
 
+// TODO: FUCK YOU! MORE COMMENTS IN CODES, NOT JUST JAVADOCS, LAZY SOUMA!
+
 /**
- * Simulates all functionality of a centralised controller inside a building. <br/>
+ * Simulates all functionality of startElevatorStatusCacheThread centralised controller inside startElevatorStatusCacheThread building. <br/>
  * This may be used as entry point for simulation.
  */
 public class Building {
+    private static final int putStoppingHopMaxRetries = 100;
     /**
      * This is config file path
      */
@@ -48,7 +52,7 @@ public class Building {
      */
     private final int totalDisplacementMeters;
     /**
-     * An atomic reference of a dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is. <br/>
+     * An atomic reference of startElevatorStatusCacheThread dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is. <br/>
      * See http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
      */
     private final AtomicReference<LinkedHashMap<String, Floor>> arefFloorPositions;
@@ -57,6 +61,8 @@ public class Building {
     // http://www.infoq.com/cn/articles/ConcurrentHashMap
 
     private final ConcurrentHashMap<String, Floor> kioskHoppingRequests;
+    private final ConcurrentHashMap<Elevator, ElevatorStatus> elevatorsStatuses;
+    private Thread threadBuildingRefreshElevatorStatusCache = null;
 
     /**
      * Java.exe entry point for loading up the Building simulation element.
@@ -144,6 +150,7 @@ public class Building {
         appThreads = new Hashtable<String, AppThread>();
 
         kioskHoppingRequests = new ConcurrentHashMap<>();
+        elevatorsStatuses = new ConcurrentHashMap<>();
     }
 
     /**
@@ -166,7 +173,8 @@ public class Building {
             Elevator elevator = new Elevator("e" + i, this);
             new Thread(elevator).start();
         }
-        // start threads
+
+        startElevatorStatusCacheThread();
 
         // This is for elevator use implement by steven and kers
         new Thread(timer).start();
@@ -174,6 +182,20 @@ public class Building {
         // Wait all the thread object created. Then open control panel GUI
         Panel cp = new ControlPanel(this);
         cp.showInfo();
+
+        // show kiosk panel for testing
+        KioskPanel kiosoPanel = new KioskPanel(this);
+        kiosoPanel.showInfo();
+    }
+
+    private void startElevatorStatusCacheThread() {
+        if (threadBuildingRefreshElevatorStatusCache != null && threadBuildingRefreshElevatorStatusCache.isAlive())
+            return;
+
+        this.threadBuildingRefreshElevatorStatusCache = new Thread(() -> {
+            List<Elevator> elevators = this.getThreads(Elevator.class);
+            elevators.forEach(e -> this.elevatorsStatuses.put(e, e.getStatus()));
+        }, "BuildingRefreshElevatorStatusCache");
     }
 
     /**
@@ -203,6 +225,10 @@ public class Building {
         return appThreads.get(id);
     }
 
+    public <T extends AppThread> List<T> getThreads(Class<T> type) {
+        return appThreads.values().stream().filter((t) -> t.getClass() == type).map((t) -> (T)t).collect(Collectors.toList());
+    }
+
     /**
      * Get config file key value pair
      * @param property Key of the configuration property.
@@ -213,7 +239,7 @@ public class Building {
     }
 
     /**
-     * Returns the status of elevators queues in a textual format for user to see.
+     * Returns the status of elevators queues in startElevatorStatusCacheThread textual format for user to see.
      * @return A string representation of the status of the elevators queues.
      * @see ControlPanel
      */
@@ -229,7 +255,7 @@ public class Building {
     }
 
     /**
-     * Returns the status of kiosk queue in a textual format for user to see.
+     * Returns the status of kiosk queue in startElevatorStatusCacheThread textual format for user to see.
      * @return A string representation of the status of the kiosk queue.
      * @see ControlPanel
      */
@@ -249,32 +275,23 @@ public class Building {
         return gkq;
     }
 
+    // TODO: remove if wasting space
     /**
+     * [DEPRECATED]
      * Get all statuses of different elevators accordingly.
      * @return An array list of elevator statuses.
      */
-    public ArrayList<ElevatorStatus> getElevatorStatus() {
+    @Deprecated
+    public Collection<ElevatorStatus> getElevatorStatus() {
+        /*
         ArrayList<ElevatorStatus> es = null;
         for (int i = 0; i < Elevator.elevatorCount; i++) {
             es.add(((Elevator) (this.getThread("e" + i))).getStatus());
         }
 
         return es;
-    }
-
-    // TODO: Removing this method. Consider using push-in-push-out method to control the next hop of different elevators.
-    @Deprecated
-    public String getResult(int floor, String id) {
-        for (int i = 0; i < Kiosk.kioskCount; i++) {
-            HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
-            // demo of how to get queue of kiosk,
-            // can also use this to get queue of elevator
-        }
-
-        // ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
-        // Algorithm stuff
-
-        return ""; // for duplicated request
+        */
+        return this.elevatorsStatuses.values();
     }
 
     /**
@@ -287,7 +304,7 @@ public class Building {
 
     /**
      * Get an dictionary for all floors, with their names and the displacement that matches the vertical position of the floor.
-     * @return A <code>Map</code> object that contains a list of: <br/>
+     * @return A <code>Map</code> object that contains startElevatorStatusCacheThread list of: <br/>
      * <code>String</code> of the floor names and <br/>
      * <code>Floor</code> of the real floor object, which contains displacement that matches the vertical position of the floor in meters.
      */
@@ -304,19 +321,41 @@ public class Building {
         return arefFloorPositions.get().get(floorName);
     }
 
-    // TODO: JavaDoc for kioskPushNewHopRequest(Kiosk, String)
-    public synchronized Elevator kioskPushNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
+    public synchronized Elevator putNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
         Floor src = kiosk.getFloor();
         Floor dest = getFloorPositions().get(destFloor);
 
         if (dest == null)
-            throw new IndexOutOfBoundsException("destFloor key not exist in floorPositions");
+            throw new IndexOutOfBoundsException("destFloor key not exist in floorPositions"); // TODO: throw or null;
 
-        // TODO: you got the source floor and dest floor pair, what to do?
-        // TODO: remember to calculate which lift to catch the request and
-        // TODO: push back to the lift to update its next destination.
+        if (src.equals(dest))
+            return null; // won't assign any but shit you donk
 
-        // TODO: return an Elevator that such src:dest pair assigned to
+        boolean goingUp = dest.getYDisplacement() - src.getYDisplacement() > 0;
+
+        // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
+        // TODO: calculate which lift to catch the request
+        LinkedList<ElevatorStatus> ess = new LinkedList<>(elevatorsStatuses.values());
+
+        int tries = 0;
+        for (int i = 0; i < ess.size() && tries < putStoppingHopMaxRetries; i = ++tries % ess.size()) {
+            ElevatorStatus es = ess.get(i);
+
+            // TODO: test if correct for all cases for following block of formulas
+            int direction = goingUp ? 1 : -1;
+            double displacementElevatorStop = es.getYPosition() + direction * es.getBreakDistance();
+            double displacementFloor = dest.getYDisplacement();
+            if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
+                continue;
+
+            // push back to the lift to update its next destination.
+            if (es.getElevator().putNewDestination(dest)) {
+                // return an Elevator that such src:dest pair assigned to
+                return es.getElevator();
+            }
+        }
+
+        // return null if retries but failed at all
         return null;
     }
 }
