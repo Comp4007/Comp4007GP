@@ -40,23 +40,13 @@ public class KioskPanel implements Panel{
 	private String[] floorList;
 
 	public void showInfo() {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					KioskPanel window = new KioskPanel();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the application.
-	 */
-	public KioskPanel() {
-		initialize();
+		EventQueue.invokeLater(() -> {
+            try {
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 	
 	public KioskPanel(Building building) {
