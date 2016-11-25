@@ -33,10 +33,7 @@ public class KioskPanel implements Panel{
 	private JTextField infoDisplay;
 //	private Building building;
 	
-	/**
-	 * Launch the application.
-	 * @return 
-	 */
+
 	public void showInfo() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -50,6 +47,10 @@ public class KioskPanel implements Panel{
 		});
 	}
 	
+	/**
+	 * Launch the application.
+	 * @return 
+	 */
 	 public static void main(String[] args){
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
