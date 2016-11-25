@@ -22,6 +22,7 @@ import MyApp.panel.Panel;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.awt.event.ActionEvent;
@@ -60,6 +61,7 @@ public class KioskPanel implements Panel{
 	
 	public KioskPanel(Building building) {
 		this.building = building;
+		floorList = building.getFloorNames();
 		initialize();
 	}
 
@@ -88,9 +90,9 @@ public class KioskPanel implements Panel{
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
+		System.out.println(Arrays.toString(floorList));
 		//floor combobox
-		JComboBox FloorCbx = new JComboBox();
-		FloorCbx.setModel(new DefaultComboBoxModel(floorList));
+		JComboBox FloorCbx = new JComboBox(floorList);
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
 		gbc_FloorCbx.fill = GridBagConstraints.HORIZONTAL;
 		gbc_FloorCbx.gridwidth = 2;
@@ -303,7 +305,7 @@ public class KioskPanel implements Panel{
 
 			private void summitFloor() {
 				// TODO Auto-generated method stub
-				
+				((Kiosk) building.getThread("e1")).readKeypad(FloorCbx.getSelectedItem().toString());
 			}
 		} );
 		panel.add(btnSummit, gbc_btnSummit);

@@ -46,11 +46,11 @@ public class Kiosk extends AppThread {
         return false;
     }
 
-    private boolean readKeypad(String destFloor){
+    protected boolean readKeypad(String destFloor){
     	return addRequest(destFloor);//dummy
     }
     
-    private boolean readRFID(int id){
+    protected boolean readRFID(int id){
         String destFloor = "";
     	return addRequest(destFloor);//dummy
     }
