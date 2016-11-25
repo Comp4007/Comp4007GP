@@ -5,10 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import MyApp.elevator.*;
 import MyApp.kiosk.*;
@@ -17,6 +19,8 @@ import MyApp.panel.AdminPanel;
 import MyApp.panel.ControlPanel;
 import MyApp.panel.Panel;
 import MyApp.timer.Timer;
+
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Simulates all functionality of a centralised controller inside a building. <br/>
@@ -42,12 +46,17 @@ public class Building {
     /**
      * Indicates the total meters that an Elevator may move vertically for.
      */
-    private final int displacementMeters;
+    private final int totalDisplacementMeters;
     /**
-     * A dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is.
+     * An atomic reference of a dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is. <br/>
+     * See http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
      */
-    private final Hashtable<String, Double> floorPositions;
-    private final AtomicReference<Hashtable<String, Double>> arefFloorPositions; // http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
+    private final AtomicReference<LinkedHashMap<String, Floor>> arefFloorPositions;
+
+    // http://cookieandcoketw.blogspot.hk/2013/03/java-hashmap-hashtable.html
+    // http://www.infoq.com/cn/articles/ConcurrentHashMap
+
+    private final ConcurrentHashMap<String, Floor> kioskHoppingRequests;
 
     /**
      * Java.exe entry point for loading up the Building simulation element.
@@ -87,20 +96,22 @@ public class Building {
 
         // values for final properties
         if (cfgProps.containsKey("DisplacementMeters"))
-            this.displacementMeters = Integer.parseInt(cfgProps.getProperty("DisplacementMeters"));
+            this.totalDisplacementMeters = Integer.parseInt(cfgProps.getProperty("DisplacementMeters"));
         else
             throw new InvalidPropertiesFormatException("missing DisplacementMeters");
 
         {
             String[] floorNames;
             if (cfgProps.containsKey("FloorNames"))
-                floorNames = cfgProps.getProperty("FloorNames").split("|");
+                floorNames = cfgProps.getProperty("FloorNames").split("\\|");
             else
                 throw new InvalidPropertiesFormatException("missing FloorNames");
 
             double[] floorPositions;
-            if (cfgProps.containsKey("FloorPositions"))
-                floorPositions = Arrays.stream(cfgProps.getProperty("FloorPositions").split("|")).mapToDouble(Double::parseDouble).toArray();
+            if (cfgProps.containsKey("FloorPositions")) {
+                Stream<String> s = Arrays.stream(cfgProps.getProperty("FloorPositions").split("\\|"));
+                floorPositions = s.mapToDouble(Double::parseDouble).toArray();
+            }
             else
                 throw new InvalidPropertiesFormatException("missing FloorPositions");
 
@@ -108,12 +119,19 @@ public class Building {
             if (floorNames.length != floorPositions.length)
                 throw new InvalidPropertiesFormatException("floorNames.length != floorPositions.length");
 
-            this.floorPositions = new Hashtable<>();
+            // A dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is.
+            Hashtable<String, Floor> floorPositions1 = new Hashtable<>();
+            Floor lowerFloor = null;
             for (int i = 0; i < floorNames.length; i++) {
-                this.floorPositions.put(floorNames[i], floorPositions[i]);
+                Floor floor = new Floor(floorNames[i], floorPositions[i]);
+                floor.setLowerFloor(lowerFloor);
+                floorPositions1.put(floorNames[i], floor);
+                lowerFloor = floor;
             }
 
-            this.arefFloorPositions = new AtomicReference<>(this.floorPositions);
+            LinkedHashMap<String, Floor> floorPositions2 = floorPositions1.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (e1,e2) -> e1, LinkedHashMap::new));
+
+            this.arefFloorPositions = new AtomicReference<>(floorPositions2);
         }
 
         // get and configure logger
@@ -124,6 +142,8 @@ public class Building {
         log.addHandler(conHd);
         log.setLevel(Level.INFO);
         appThreads = new Hashtable<String, AppThread>();
+
+        kioskHoppingRequests = new ConcurrentHashMap<>();
     }
 
     /**
@@ -168,7 +188,7 @@ public class Building {
      * Kiosk and elevator are appThread object. When they create, they will add into this method.<br/>
      * This method is for <code>Building:getThread(String id)</code>
      */
-    public void regThread(AppThread appThread) {
+    public void putThread(AppThread appThread) {
         appThreads.put(appThread.getID(), appThread);
     }
 
@@ -216,7 +236,7 @@ public class Building {
     public String getKioskQueue(){
         String gkq = "";
         
-        for(int i = 0; i < Kiosk.koiskCount; i++){
+        for(int i = 0; i < Kiosk.kioskCount; i++){
             HashMap<Integer, String> rq =  this.getThread("k" + i).getQueue();
             // demo of how to get queue of kiosk, 
             // can also use this to get queue of elevator
@@ -245,7 +265,7 @@ public class Building {
     // TODO: Removing this method. Consider using push-in-push-out method to control the next hop of different elevators.
     @Deprecated
     public String getResult(int floor, String id) {
-        for (int i = 0; i < Kiosk.koiskCount; i++) {
+        for (int i = 0; i < Kiosk.kioskCount; i++) {
             HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
             // demo of how to get queue of kiosk,
             // can also use this to get queue of elevator
@@ -261,8 +281,8 @@ public class Building {
      * Get the total displacement that an elevator may travel for vertically within the building.
      * @return The displacement, in meters.
      */
-    public final int getDisplacementMeters() {
-        return displacementMeters;
+    public final int getTotalDisplacementMeters() {
+        return totalDisplacementMeters;
     }
 
     /**
@@ -271,13 +291,27 @@ public class Building {
      * <code>String</code> of the floor name and <br/>
      * <code>double</code> of the displacement that matches the vertical position of the floor in meters.
      */
-    public final Hashtable<String, Double> getFloorPositions() {
+    public final Map<String, Floor> getFloorPositions() {
         return arefFloorPositions.get();
     }
 
+    public final Floor getFloorPosition(String floorName) {
+        return arefFloorPositions.get().get(floorName);
+    }
+
     // TODO: JavaDoc for kioskPushNewHopRequest(Kiosk, String)
-    public synchronized void kioskPushNewHopRequest(Kiosk kiosk, String destFloor) {
+    public synchronized boolean kioskPushNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
+        Floor src = kiosk.getFloor();
+        Floor dest = getFloorPositions().get(destFloor);
+
+        if (dest == null)
+            throw new IndexOutOfBoundsException("destFloor key not exist in floorPositions");
+
         // TODO: you got the source floor and dest floor pair, what to do?
-        // TODO: remember to calculate which lift to catch the request and push back to the lift to update its next destination.
+        // TODO: remember to calculate which lift to catch the request and
+        // TODO: push back to the lift to update its next destination.
+
+        // TODO: TRUE=added, FALSE=duplicated
+        return false;
     }
 }
