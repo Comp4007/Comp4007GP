@@ -1,48 +1,63 @@
 package MyApp.kiosk;
 
+import MyApp.Floor;
+import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import javax.swing.JFrame;
 
 import MyApp.Building;
-import MyApp.elevator.Elevator;
 
 
 public class Kiosk extends AppThread {
-	public static int koiskCount = 0;
-	private int floor;
+	public static int kioskCount = 0;
+	private Floor floor;
 	
     public Kiosk(String id, Building building) {
     	super(id, building);
-    	this.floor = koiskCount;
-    	koiskCount++;
+    	this.floor = (Floor) building.getFloorPositions().values().toArray()[kioskCount];
+    	kioskCount++;
     	
     }
 
-    
-    public void addRequest(int target){
-    	String elevatorID = building.getResult(target, id);
-    	if(elevatorID.equals("")){
-    		System.out.print("request handled but duplicated");
-    		//update GUI
-    	}else{
-    		queue.put(target, elevatorID);
-    		log.info("Floor" + target + "request added to elevator" + elevatorID);
-    		//update GUI
-    	}
+    public Floor getFloor() {
+        return floor;
     }
 
-    private void readKeypad(int floor){
-    	addRequest(floor);//dummy
+    public void setFloor(Floor floor) {
+        this.floor = floor;
+    }
+
+    public boolean addRequest(String target){
+    	// String elevatorID = building.getResult(target, id);
+
+        boolean duplicated;
+        try {
+            duplicated = !this.building.kioskPushNewHopRequest(this, target);
+        } catch (IndexOutOfBoundsException e) {
+            return false;
+        }
+
+    	if (duplicated) {
+            log.info("request handled but duplicated");
+            //update GUI
+        } else {
+            log.info("Floor" + target + "request added to queue");
+            //update GUI
+        }
+
+        return false;
+    }
+
+    private boolean readKeypad(String destFloor){
+    	return addRequest(destFloor);//dummy
     }
     
-    private void readRFID(int id){
-    	//somehow simulate
-    	addRequest(id);//dummy
+    private boolean readRFID(int id){
+        String destFloor = "";
+    	return addRequest(destFloor);//dummy
     }
     
     public HashMap<Integer, String> getQueue(){
