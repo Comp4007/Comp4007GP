@@ -90,7 +90,7 @@ public class Elevator extends AppThread {
     	 * Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
     	 */
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
-    	addQueue(1);
+    	elevatorCount++;
     }
 
     //for the controller to check if an elevator can stop
