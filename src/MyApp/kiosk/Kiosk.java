@@ -33,20 +33,15 @@ public class Kiosk extends AppThread {
     public boolean addRequest(String target){
     	// String elevatorID = building.getResult(target, id);
 
-        boolean duplicated;
+        Elevator assignedTo;
         try {
-            duplicated = !this.building.kioskPushNewHopRequest(this, target);
+            assignedTo = this.building.kioskPushNewHopRequest(this, target);
         } catch (IndexOutOfBoundsException e) {
             return false;
         }
 
-    	if (duplicated) {
-            log.info("request handled but duplicated");
-            //update GUI
-        } else {
-            log.info("Floor" + target + "request added to queue");
-            //update GUI
-        }
+        log.info("Floor" + target + "request assigned to elevator " + assignedTo.getID());
+        //update GUI
 
         return false;
     }

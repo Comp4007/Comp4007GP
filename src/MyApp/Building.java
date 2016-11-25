@@ -287,12 +287,17 @@ public class Building {
 
     /**
      * Get an dictionary for all floors, with their names and the displacement that matches the vertical position of the floor.
-     * @return A <code>Hastable</code> object that contains a list of: <br/>
-     * <code>String</code> of the floor name and <br/>
-     * <code>double</code> of the displacement that matches the vertical position of the floor in meters.
+     * @return A <code>Map</code> object that contains a list of: <br/>
+     * <code>String</code> of the floor names and <br/>
+     * <code>Floor</code> of the real floor object, which contains displacement that matches the vertical position of the floor in meters.
      */
     public final Map<String, Floor> getFloorPositions() {
         return arefFloorPositions.get();
+    }
+
+    public final String[] getFloorNames() {
+        Map<String, Floor> fp = getFloorPositions();
+        return fp.keySet().toArray(new String[fp.size()]);
     }
 
     public final Floor getFloorPosition(String floorName) {
@@ -300,7 +305,7 @@ public class Building {
     }
 
     // TODO: JavaDoc for kioskPushNewHopRequest(Kiosk, String)
-    public synchronized boolean kioskPushNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
+    public synchronized Elevator kioskPushNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
         Floor src = kiosk.getFloor();
         Floor dest = getFloorPositions().get(destFloor);
 
@@ -311,7 +316,7 @@ public class Building {
         // TODO: remember to calculate which lift to catch the request and
         // TODO: push back to the lift to update its next destination.
 
-        // TODO: TRUE=added, FALSE=duplicated
-        return false;
+        // TODO: return an Elevator that such src:dest pair assigned to
+        return null;
     }
 }
