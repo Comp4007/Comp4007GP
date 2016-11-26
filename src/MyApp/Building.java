@@ -371,19 +371,20 @@ public class Building {
         // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
         // TODO: calculate which lift to catch the request
         LinkedList<ElevatorStatus> ess = new LinkedList<>(elevatorsStatuses.values());
-        ess.sort(new ElevatorStatusDistanceToFloorComparator(goingUp, src));
+//        ess.sort(new ElevatorStatusDistanceToFloorComparator(goingUp, src));
 
         int tries = 0;
         for (int i = 0; i < ess.size() && tries < putStoppingHopMaxRetries; i = ++tries % ess.size()) {
             ElevatorStatus es = ess.get(i);
 
-            // TODO: START - test if correct for all cases for following block of formulas
-            int direction = goingUp ? 1 : -1;
-            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBreakDistance();
-            double displacementFloor = dest.getYDisplacement();
-            if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
-                continue;
-            // TODO: END - test if correct for all cases for following block of formulas
+//            // TODO: START - test if correct for all cases for following block of formulas
+//            // check if can stop within floor
+//            int direction = goingUp ? 1 : -1;
+//            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBreakDistance();
+//            double displacementFloor = dest.getYDisplacement();
+//            if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
+//                continue;
+//            // TODO: END - test if correct for all cases for following block of formulas
 
             // push back to the lift to update its next destination.
             if (es.getElevator().putNewDestination(dest)) {
