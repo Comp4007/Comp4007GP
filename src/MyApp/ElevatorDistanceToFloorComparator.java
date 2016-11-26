@@ -16,7 +16,7 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
         this.floor = floor;
     }
 
-    // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
+    // sort by: queueCount, direction, distance to src, speed (~=braking dist)
     @Override
     public int compare(ElevatorStatus o1, ElevatorStatus o2) { // ASC
         // queue count
