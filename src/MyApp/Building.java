@@ -371,6 +371,7 @@ public class Building {
         // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
         // TODO: calculate which lift to catch the request
         LinkedList<ElevatorStatus> ess = new LinkedList<>(elevatorsStatuses.values());
+        ess.sort(new ElevatorStatusDistanceToFloorComparator(goingUp, src));
 
         int tries = 0;
         for (int i = 0; i < ess.size() && tries < putStoppingHopMaxRetries; i = ++tries % ess.size()) {
@@ -378,7 +379,7 @@ public class Building {
 
             // TODO: START - test if correct for all cases for following block of formulas
             int direction = goingUp ? 1 : -1;
-            double displacementElevatorStop = es.getYPosition() + direction * es.getBreakDistance();
+            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBreakDistance();
             double displacementFloor = dest.getYDisplacement();
             if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
                 continue;
