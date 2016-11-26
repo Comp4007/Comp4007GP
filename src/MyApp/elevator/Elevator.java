@@ -67,7 +67,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     /**
      * Use array list become mission queue
      */
-    private ArrayList<Integer> missionQueue;
+    private ArrayList<Integer> missionQueue = new ArrayList<Integer>();
     /**
      * Get the floor list form building for the target number
      */
@@ -123,10 +123,12 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      */
     public void addQueue(int target){
     	queue.put(target, id);
+    	missionQueue.add(target);
+    	
     	//If the target is already in mission queue, no need to add.
-    	if(!missionQueue.contains(target)){
+    	/*if(!missionQueue.contains(target)){
     		//TODO the rearrange the mission queue
-    	}
+    	}*/
     }
     
     private void simulate(){
@@ -172,6 +174,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	if(velocity == 0){
     		height = (target-1) * heightOfFloor;
     		queue.remove(missionQueue.get(0));
+    		missionQueue.remove(0);
     	}
     	log.info(height+", "+velocity+", "+acceleration);
     	return;

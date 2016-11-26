@@ -33,28 +33,19 @@ public class AdminPanel implements Panel{
 	private JTable table;
 	private final String dbFName = "etc/RFID_DB";
 
-	public AdminPanel(){}
-	
-	/**
-	 * @wbp.parser.constructor
-	 */
-	public AdminPanel(String signal){
+	public AdminPanel(){
 		initialize();
 	}
 	
 	@Override
 	public void showInfo() {
-		EventQueue.invokeLater(new Runnable() {
-			
-			public void run() {
-				try {
-					AdminPanel window = new AdminPanel("Open");
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 	
 	/**
@@ -230,7 +221,6 @@ public class AdminPanel implements Panel{
         frame.setSize(667,448);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
 	}
 
 }
