@@ -210,8 +210,18 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         return putNewDestination(floor);
 	}
 
-    // TODO: JavaDoc for putNewDestination(Floor)
+    /**
+     * Building assign the request to elevator
+     * Elevator will simulate the destination whether can stop or not
+     * If it can stop, return true. Then manage the mission queue.
+     * If it cannot stop, return false.
+     * @param floor
+     * @return
+     */
     public final synchronized boolean putNewDestination(Floor floor) {
+    	//Get the floor height plus breaking distance to compare with the height of elevator 
+    	
+    	
         // TODO: what do you do when I(Building) gives you new destination?
         // TODO: return boolean if you may stop there. otherwise I'll assign another lift then -- Charles
         return true;
