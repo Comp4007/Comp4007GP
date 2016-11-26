@@ -47,7 +47,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * This parameter represent height of elevator 
      * It will update every 30 ms
      */
-    private double height = 4;
+    private double height = 0;
     /**
      *This parameter represent velocity of elevator 
      * It will update every 30 ms
@@ -69,9 +69,9 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     private int timeDuration;
     //private String id;
     /**
-     * Sort the HashMap(Request of queue), Also this is elevator mission queue
+     * Use array list become mission queue
      */
-    private SortedSet<Integer> sortedQueue;
+    private ArrayList<Integer> missionQueue;
     
     public Elevator(String id, Building building) {
     	super(id, building);
@@ -102,7 +102,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 
     //for the controller to check if an elevator can stop
     public final ElevatorStatus getStatus(){
-    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, sortedQueue.size());
+    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, missionQueue.size());
     }
 
     public int getElevatorId() {
@@ -110,16 +110,17 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     }
 
     /**
-     * When building finish the simulate, the target result will use this method to pass in elvator mission queue
+     * When building finish the simulate, the target result will use this method to pass in elevator mission queue
+     * When elevator accept the request from building, it will rearrange the mission queue
      * @param target
      */
     public void addQueue(int target){
     	queue.put(target, id);
-    	sortedQueue = new TreeSet<Integer>(queue.keySet());
+    	//
     }
     
     private void simulate(){
-    	int target = sortedQueue.first();
+    	int target = missionQueue.get(0);
     	
     	if((target-1) * heightOfFloor < height){
     		if(velocity > -2 || velocity != 0){
@@ -172,8 +173,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	
     	if(velocity == 0){
     			height = (target-1) * heightOfFloor;
-    			queue.remove(sortedQueue.first());
-    			sortedQueue = new TreeSet<Integer>(queue.keySet());
+    			queue.remove(missionQueue.get(0));
     	}
     	
     	log.info(height+", "+velocity+", "+acceleration);
@@ -219,12 +219,32 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * @return
      */
     public final synchronized boolean putNewDestination(Floor floor) {
-    	//Get the floor height plus breaking distance to compare with the height of elevator 
-    	
-    	
-        // TODO: what do you do when I(Building) gives you new destination?
-        // TODO: return boolean if you may stop there. otherwise I'll assign another lift then -- Charles
-        return true;
+    	//Deafult return false 
+    	boolean availableStop = false;
+    	//Get the floor height plus breaking distance to compare with the height of elevator (Use the top(y position) of elevator as the height)
+    	//First check the direction of elevator, if it is moving down(The height of elevator - 4m(height of floor)), y displacement + breaking distance
+    	//if it is moving up, y displacement - breaking distance
+    	if (velocity > 0) {
+    		//Moving up
+    		if(height < floor.getYDisplacement() - breakDistance){
+    			availableStop = true;
+    			//Add the request to mission queue, but the queue must rearrange
+    			addQueue((int)floor.getYDisplacement());
+    		}else{
+    			availableStop = false;
+    		}
+        } else if (velocity < 0) {
+        	//Moving down
+        	if(height-heightOfFloor > floor.getYDisplacement() + breakDistance){
+        		availableStop = true;
+        		//Add the request to mission queue, but the queue must rearrange
+        		addQueue((int)floor.getYDisplacement());
+    		}else{
+    			availableStop = false;
+    		}
+        	
+        }	
+        return availableStop;
     }
 
     @Override
