@@ -56,12 +56,19 @@ public class Building {
      * See http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
      */
     private final AtomicReference<LinkedHashMap<String, Floor>> arefFloorPositions;
-
     // http://cookieandcoketw.blogspot.hk/2013/03/java-hashmap-hashtable.html
     // http://www.infoq.com/cn/articles/ConcurrentHashMap
-
+    /**
+     * // TODO: JavaDoc for the kioskHoppingRequests
+     */
     private final ConcurrentHashMap<String, Floor> kioskHoppingRequests;
+    /**
+     * Stores all the statuses of all the Elevators inside this Building, as a cache.
+     */
     private final ConcurrentHashMap<Elevator, ElevatorStatus> elevatorsStatuses;
+    /**
+     * Holds the reference of the thread that refreshes the cache of statuses of all elevators.
+     */
     private Thread threadBuildingRefreshElevatorStatusCache = null;
 
     /**
@@ -184,10 +191,13 @@ public class Building {
         cp.showInfo();
 
         // show kiosk panel for testing
-        KioskPanel kiosoPanel = new KioskPanel(this);
-        kiosoPanel.showInfo();
+        KioskPanel kioskPanel = new KioskPanel(this);
+        kioskPanel.showInfo();
     }
 
+    /**
+     * Ensures that the elevator status cache thread is running. Create new thread if not exist or not alive.
+     */
     private void startElevatorStatusCacheThread() {
         if (threadBuildingRefreshElevatorStatusCache != null && threadBuildingRefreshElevatorStatusCache.isAlive())
             return;
@@ -225,6 +235,12 @@ public class Building {
         return appThreads.get(id);
     }
 
+    /**
+     * Get threads from the threads storage that matches the type extending.
+     * @param type The class object of the type that extends the AppThread.
+     * @param <T> The type that extends the AppThread.
+     * @return A list of the threads that matches the type extending.
+     */
     public <T extends AppThread> List<T> getThreads(Class<T> type) {
         return appThreads.values().stream().filter((t) -> t.getClass() == type).map((t) -> (T)t).collect(Collectors.toList());
     }
@@ -312,15 +328,34 @@ public class Building {
         return arefFloorPositions.get();
     }
 
+    /**
+     * Get all the floor names as a String array.
+     * @return A string array of all floor names.
+     */
     public final String[] getFloorNames() {
         Map<String, Floor> fp = getFloorPositions();
         return fp.keySet().toArray(new String[fp.size()]);
     }
 
+    /**
+     * Get floor object by the floor name.
+     * @param floorName The alias of the floor that is human-readable.
+     * @return The floor object that is inside the building, containing the information and specifications about the floor.
+     */
     public final Floor getFloorPosition(String floorName) {
         return arefFloorPositions.get().get(floorName);
     }
 
+    /**
+     * Provides a method for Kiosk to put a new hop request for an elevator to stop at.
+     * @param kiosk The source Kiosk that puts the request into this Building.
+     * @param destFloor The destination floor that, after passenger boarding from the source floor, which floor to let passenger alight.
+     * @return The elevator that is assigned for passenger to board.
+     * @throws IndexOutOfBoundsException Throws when <ul>
+     *     <li>destFloor key not exist in floorPositions;</li>
+     *     <li>destFloor key not exist in floorPositions;</li>
+     * </ul>
+     */
     public synchronized Elevator putNewHopRequest(Kiosk kiosk, String destFloor) throws IndexOutOfBoundsException {
         Floor src = kiosk.getFloor();
         Floor dest = getFloorPositions().get(destFloor);
@@ -341,12 +376,13 @@ public class Building {
         for (int i = 0; i < ess.size() && tries < putStoppingHopMaxRetries; i = ++tries % ess.size()) {
             ElevatorStatus es = ess.get(i);
 
-            // TODO: test if correct for all cases for following block of formulas
+            // TODO: START - test if correct for all cases for following block of formulas
             int direction = goingUp ? 1 : -1;
             double displacementElevatorStop = es.getYPosition() + direction * es.getBreakDistance();
             double displacementFloor = dest.getYDisplacement();
             if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
                 continue;
+            // TODO: END - test if correct for all cases for following block of formulas
 
             // push back to the lift to update its next destination.
             if (es.getElevator().putNewDestination(dest)) {
