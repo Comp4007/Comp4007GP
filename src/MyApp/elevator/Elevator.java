@@ -68,6 +68,10 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * Use array list become mission queue
      */
     private ArrayList<Integer> missionQueue;
+    /**
+     * Get the floor list form building for the target number
+     */
+    private String[] floorList;
     
     public Elevator(String id, Building building) {
     	super(id, building);
@@ -85,6 +89,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	// v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
+    	floorList = building.getFloorNames();
     	addQueue(2);
     }
 
@@ -99,6 +104,17 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     public int getElevatorId() {
         return elevatorId;
     }
+    
+    public int getFloorIndex(String floorName){
+    	int count = 0;
+    	for(int i=0; i<floorList.length; i++){
+    		if(floorList[i].equals(floorName)){
+    			count = i;
+    			break;
+    		}
+    	}
+    	return count+1;
+    }
 
     /**
      * When building finish the simulate, the target result will use this method to pass in elevator mission queue
@@ -107,7 +123,10 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      */
     public void addQueue(int target){
     	queue.put(target, id);
-    	//
+    	//If the target is already in mission queue, no need to add.
+    	if(!missionQueue.contains(target)){
+    		//TODO the rearrange the mission queue
+    	}
     }
     
     private void simulate(){
@@ -202,7 +221,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     		if(height < floor.getYDisplacement() - breakDistance){
     			availableStop = true;
     			//Add the request to mission queue, but the queue must rearrange
-    			addQueue((int)floor.getYDisplacement());
+    			addQueue(getFloorIndex(floor.getName()));
     		}else{
     			availableStop = false;
     		}
@@ -211,7 +230,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         	if(height-heightOfFloor > floor.getYDisplacement() + breakDistance){
         		availableStop = true;
         		//Add the request to mission queue, but the queue must rearrange
-        		addQueue((int)floor.getYDisplacement());
+        		addQueue(getFloorIndex(floor.getName()));
     		}else{
     			availableStop = false;
     		}
