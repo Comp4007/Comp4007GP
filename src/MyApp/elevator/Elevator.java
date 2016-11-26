@@ -127,7 +127,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	
     	//If the target is already in mission queue, no need to add.
     	/*if(!missionQueue.contains(target)){
-    		//TODO the rearrange the mission queue
+    		//TODO the rearrange the mission queue(Split two mission queue one is up one is down)
     	}*/
     }
     
