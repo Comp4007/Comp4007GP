@@ -93,13 +93,14 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	/**
     	 * Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
     	 */
+    	// v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
     }
 
     //for the controller to check if an elevator can stop
     public final ElevatorStatus getStatus(){
-    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration);
+    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, sortedQueue.size());
     }
 
     public int getElevatorId() {
