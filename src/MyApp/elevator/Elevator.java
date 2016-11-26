@@ -3,15 +3,12 @@ package MyApp.elevator;
 import MyApp.Floor;
 import MyApp.misc.*;
 import MyApp.timer.Timer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import MyApp.Building;
 import MyApp.kiosk.Kiosk;
-
 
 public class Elevator extends AppThread implements Comparable<Elevator> {
 	/**
@@ -67,7 +64,6 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * Default setting in config file. Elevator will update itself for 30ms
      */
     private int timeDuration;
-    //private String id;
     /**
      * Use array list become mission queue
      */
@@ -75,32 +71,27 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     
     public Elevator(String id, Building building) {
     	super(id, building);
-    	elevatorCount++;
-    	/**
-    	 * Get property from building object
-    	 */
+    	//Get property from building object
     	this.heightOfFloor = Double.parseDouble(building.getProperty("HeightOfFloor"));
     	this.accelerationParameter = Double.parseDouble(building.getProperty("Acceleration"));
     	this.minOfMeter = Double.parseDouble(building.getProperty("MinOfMeter"));
     	this.timeDuration = Integer.parseInt(building.getProperty("TimerTicks"));
-    	/**
-    	 * Get all kiosk MBox 
-    	 */   	
+    	//Get all kiosk MBox for communication with kiosk  	
     	kioskMBox = new ArrayList<MBox>();
-    	//this.id = id;
     	for(int i = 0; i < Kiosk.kioskCount; i++){
     		kioskMBox.add(building.getThread("k" + i).getMBox());
-    	}//for communication with kiosk
-    	/**
-    	 * Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
-    	 */
+    	}
+    	//Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
     	// v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
     	addQueue(2);
     }
 
-    //for the controller to check if an elevator can stop
+    /**
+     * It is for every class get all the status of the elevator 
+     * @return
+     */
     public final ElevatorStatus getStatus(){
     	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, missionQueue.size());
     }
@@ -130,17 +121,15 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     			log.info("should break");
         		acceleration = accelerationParameter;
         	}
-    		
-        		velocity = velocity+acceleration * timeDuration/1000;
+        	velocity = velocity+acceleration * timeDuration/1000;
         		
-        		if(velocity > 0){
+        	if(velocity > 0){
         		velocity = 0;
         		acceleration = 0;
-	        	}else if(velocity < -2){
+	        }else if(velocity < -2){
 	        		velocity = -2;
 	        		acceleration = 0;
-	        	}
-        	
+	        }	
 		}
     	
     	if((target-1) * heightOfFloor > height){
@@ -151,37 +140,24 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     			log.info("should break");
         		acceleration = -accelerationParameter;
         	}
-    		
-    		
-        		velocity = velocity+acceleration * timeDuration/1000;
-        		
-        		if(velocity < 0){
+        	velocity = velocity+acceleration * timeDuration/1000;
+        	if(velocity < 0){
         		velocity = 0;
         		acceleration = 0;
-	        	}else if(velocity > 2){
+	        }else if(velocity > 2){
 	        		velocity = 2;
 	        		acceleration = 0;
-	        	}
-        
-		}
-    	
-    	
-    	
-    	//log.info(velocity+"");
-    	
-    	height += velocity*timeDuration/1000 + 0.5*(acceleration)*Math.pow(timeDuration/1000,2);
-    	
+	        }     
+		}		
+    	height += velocity*timeDuration/1000 + 0.5*(acceleration)*Math.pow(timeDuration/1000,2);	
     	if(velocity == 0){
-    			height = (target-1) * heightOfFloor;
-    			queue.remove(missionQueue.get(0));
+    		height = (target-1) * heightOfFloor;
+    		queue.remove(missionQueue.get(0));
     	}
-    	
     	log.info(height+", "+velocity+", "+acceleration);
-    	
     	return;
     }
-    //------------------------------------------------------------
-    // run
+
     public void run() {
 	while (true) {
 	    int timerID = Timer.setTimer(id, timeDuration);
@@ -197,12 +173,9 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 			break;
 		}
 	}
-	
-	
-	
 	System.out.println(id + ": Terminating This Lift!");
 	System.exit(0);
-    } // run
+    }
 
 	// TODO: JavaDoc for putNewDestination(String)
     public final boolean putNewDestination(String floorName) {
@@ -251,4 +224,4 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     public int compareTo(Elevator o) {
         return this.elevatorId - o.elevatorId;
     }
-} // PlayerA
+}
