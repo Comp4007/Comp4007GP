@@ -5,6 +5,7 @@ import MyApp.misc.*;
 import MyApp.timer.Timer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -20,7 +21,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 
     private int elevatorId;
 	/**
-	 * Default setting in config file. Assume each floor has 2.5m
+	 * Default setting in config file. Assume each floor has 4m
 	 */
 	@Deprecated
 	private double heightOfFloor;
@@ -33,7 +34,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 	 */
 	private double acceleration;
 	/**
-	 * Default setting in config file. Assume the elevator move 60 meter per 1 mins
+	 * Default setting in config file. Assume the elevator move 120 meter per 1 mins
 	 * This is reference hitachi elevator spec.
 	 */
 	private	double minOfMeter;
@@ -46,7 +47,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * This parameter represent height of elevator 
      * It will update every 30 ms
      */
-    private double height = 0;
+    private double height = 4;
     /**
      *This parameter represent velocity of elevator 
      * It will update every 30 ms
@@ -96,6 +97,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	// v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
+    	addQueue(2);
     }
 
     //for the controller to check if an elevator can stop
@@ -120,7 +122,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	int target = sortedQueue.first();
     	
     	if((target-1) * heightOfFloor < height){
-    		if(velocity > -1 || velocity != 0){
+    		if(velocity > -2 || velocity != 0){
     			acceleration = -accelerationParameter;
     		}
     		if(((target-1) * heightOfFloor + breakDistance) >= height){
@@ -133,15 +135,15 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         		if(velocity > 0){
         		velocity = 0;
         		acceleration = 0;
-	        	}else if(velocity < -1){
-	        		velocity = -1;
+	        	}else if(velocity < -2){
+	        		velocity = -2;
 	        		acceleration = 0;
 	        	}
         	
 		}
     	
     	if((target-1) * heightOfFloor > height){
-    		if(velocity < 1 || velocity != 0){
+    		if(velocity < 2 || velocity != 0){
     			acceleration = accelerationParameter;
     		}
     		if(((target-1) * heightOfFloor - breakDistance) <= height){
@@ -155,8 +157,8 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         		if(velocity < 0){
         		velocity = 0;
         		acceleration = 0;
-	        	}else if(velocity > 1){
-	        		velocity = 1;
+	        	}else if(velocity > 2){
+	        		velocity = 2;
 	        		acceleration = 0;
 	        	}
         
