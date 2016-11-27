@@ -1,7 +1,6 @@
 package MyApp.kiosk;
 
-import MyApp.Building;
-import MyApp.Floor;
+import MyApp.building.Building;
 
 import java.awt.EventQueue;
 
@@ -13,20 +12,13 @@ import javax.swing.JLabel;
 import java.awt.GridBagConstraints;
 import javax.swing.JComboBox;
 import java.awt.Insets;
-import javax.swing.DefaultComboBoxModel;
-import java.awt.Color;
-import java.awt.Font;
-import javax.swing.UIManager;
 
 import MyApp.panel.Panel;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.awt.event.ActionEvent;
-import java.awt.SystemColor;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 

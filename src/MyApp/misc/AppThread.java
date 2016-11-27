@@ -3,7 +3,7 @@ package MyApp.misc;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import MyApp.Building;
+import MyApp.building.Building;
 
 
 //======================================================================

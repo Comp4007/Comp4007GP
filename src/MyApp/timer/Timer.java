@@ -1,7 +1,7 @@
 package MyApp.timer;
 
 import MyApp.misc.*;
-import MyApp.Building;
+import MyApp.building.Building;
 
 import java.lang.Thread;
 import java.util.ArrayList;

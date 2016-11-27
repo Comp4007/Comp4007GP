@@ -1,14 +1,12 @@
 package MyApp.elevator;
 
-import MyApp.Floor;
+import MyApp.building.Floor;
 import MyApp.misc.*;
 import MyApp.timer.Timer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import MyApp.Building;
+
+import MyApp.building.Building;
 import MyApp.kiosk.Kiosk;
 
 public class Elevator extends AppThread implements Comparable<Elevator> {

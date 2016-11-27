@@ -1,12 +1,12 @@
 package MyApp.kiosk;
 
-import MyApp.Floor;
+import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
 import java.util.HashMap;
 
-import MyApp.Building;
+import MyApp.building.Building;
 
 
 public class Kiosk extends AppThread {
