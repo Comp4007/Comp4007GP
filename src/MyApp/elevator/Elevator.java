@@ -45,7 +45,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * This parameter represent height of elevator 
      * It will update every 30 ms
      */
-    private double height = 0;
+    private double height = 4;
     /**
      *This parameter represent velocity of elevator 
      * It will update every 30 ms
@@ -77,6 +77,10 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * Get the floor list form building for the target number
      */
     private String[] floorList;
+    /**
+     * True is upward, False is downward When one direction of queue is finish, it will filp to use counter direction queue
+     */
+    private boolean direction = true;
     
     public Elevator(String id, Building building) {
     	super(id, building);
@@ -95,10 +99,6 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
     	floorList = building.getFloorNames();
-    	//TODO Now is okay but no set the timer that stop the destination a few second
-    	//Finish the request and immediately go to second destination
-    	putNewDestination(new Floor("1",16));
-    	putNewDestination(new Floor("B1",4));
     }
 
     /**
@@ -144,7 +144,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	}
     }
     
-    private void simulate(ArrayList<Integer> missionQueue){
+    private void simulate(ArrayList<Integer> missionQueue) throws InterruptedException{
     	int target = missionQueue.get(0);
     	
     	if((target-1) * heightOfFloor < height){
@@ -188,6 +188,12 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     		height = (target-1) * heightOfFloor;
     		queue.remove(target);
     		missionQueue.remove(0);
+    		//Flip the direction (true is upward and false is downward)
+    		if(missionQueue.size()==0){
+    			direction ^= direction;
+    		}
+    		//This is the time of open door
+    		Thread.sleep(5000);
     	}
     	log.info(height+", "+velocity+", "+acceleration);
     	return;
@@ -202,11 +208,11 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 	    	try{
 	    		//At the beginning all elevator should be at the B2 floor
 	    		//So elevator should solve the upward request first
-	    		//if (velocity > 0) {
+	    		if (direction) {
 	    			simulate(missionQueueUpward);
-	    		//}else if (velocity < 0) {
-	    		//	simulate(missionQueueDownward);
-	    		//}
+	    		}else{
+	    			simulate(missionQueueDownward);
+	    		}
 	    	}catch(Exception e){
 	    		
 	    	}
@@ -238,26 +244,17 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	//Get the floor height plus breaking distance to compare with the height of elevator (Use the top(y position) of elevator as the height)
     	//First check the direction of elevator, if it is moving down(The height of elevator - 4m(height of floor)), y displacement + breaking distance
     	//if it is moving up, y displacement - breaking distance
-    	if (velocity > 0 || height == 0) {
-    		//Moving up
     		if(height < floor.getYDisplacement() - breakDistance){
     			availableStop = true;
     			//Add the request to mission queue, but the queue must rearrange (ascending order)
     			addQueue(getFloorIndex(floor.getName()),missionQueueUpward,"ASC");
-    		}else{
-    			availableStop = false;
-    		}
-        } else if (velocity < 0 || height == 60) {
-        	//Moving down
-        	if(height-heightOfFloor > floor.getYDisplacement() + breakDistance){
+    		}else if(height-heightOfFloor > floor.getYDisplacement() + breakDistance || floor.getYDisplacement()==0){
         		availableStop = true;
         		//Add the request to mission queue, but the queue must rearrange (descending order)
         		addQueue(getFloorIndex(floor.getName()),missionQueueDownward,"DSC");
     		}else{
     			availableStop = false;
     		}
-        	
-        }	
         return availableStop;
     }
 
