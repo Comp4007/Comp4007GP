@@ -1,4 +1,4 @@
-package MyApp;
+package MyApp.building;
 
 import java.lang.Thread;
 import java.io.FileInputStream;

@@ -1,4 +1,4 @@
-package MyApp;
+package MyApp.building;
 
 import MyApp.misc.ElevatorStatus;
 
