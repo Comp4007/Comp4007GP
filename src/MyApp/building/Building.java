@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
@@ -65,16 +68,18 @@ public class Building {
      */
     private final ConcurrentHashMap<Elevator, ElevatorStatus> elevatorsStatuses;
     /**
-     * Holds the reference of the thread that refreshes the cache of statuses of all elevators.
+     * Holds the single-thread pool of reference of the thread that refreshes the cache of statuses of all elevators.<br/>
+     * Note that using FixedThreadPool to reduce resource and time overheads for the cache refresher to run.
+     * @see java.util.concurrent.Executors
+     * @see java.util.concurrent.Executor
      */
-    private Thread threadBuildingRefreshElevatorStatusCache = null;
+    private Executor executorBuildingRefreshElevatorStatusCache = Executors.newFixedThreadPool(1);
 
     /**
      * Java.exe entry point for loading up the Building simulation element.
      */
     public static void main(String args[]) {
         Panel window = new AdminPanel();
-        window.showInfo();
         Building building;
         try {
             building = new Building();
@@ -83,12 +88,35 @@ public class Building {
             e.printStackTrace();
             return;
         }
+
+
+        java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                System.out.println("caught a application exit signal.");
+                building.appThreads.forEach((n, t) -> {
+
+                });
+            }
+        });
+
+        window.showInfo();
         building.startApp();
     }
 
     /**
      * Initialisation of the Building simulation element. <br/>
      * It will also instantiate all lifts, kiosks, control panels and other related stuffs.
+     * @throws InvalidPropertiesFormatException When the <code>*.cfg</code> file is missing one of following of properties:
+     * <ul>
+     *     <li><code>DisplacementMeters</code></li>
+     *     <li><code>FloorNames</code></li>
+     *     <li><code>FloorPositions</code></li>
+     * </ul>
+     * or
+     * <ul>
+     *     <li>Amount of <code>floorNames</code> is not the same as that of <code>floorPositions</code>.</li>
+     * </ul>
      */
     public Building() throws InvalidPropertiesFormatException {
         // read system config from property file
@@ -197,13 +225,13 @@ public class Building {
      * Ensures that the elevator status cache thread is running. Create new thread if not exist or not alive.
      */
     private void startElevatorStatusCacheThread() {
-        if (threadBuildingRefreshElevatorStatusCache != null && threadBuildingRefreshElevatorStatusCache.isAlive())
-            return;
-
-        this.threadBuildingRefreshElevatorStatusCache = new Thread(() -> {
-            List<Elevator> elevators = this.getThreads(Elevator.class);
-            elevators.forEach(e -> this.elevatorsStatuses.put(e, e.getStatus()));
-        }, "BuildingRefreshElevatorStatusCache");
+        try {
+            executorBuildingRefreshElevatorStatusCache.execute(() -> {
+                List<Elevator> elevators = this.getThreads(Elevator.class);
+                elevators.forEach(e -> this.elevatorsStatuses.put(e, e.getStatus()));
+            });
+        } catch (RejectedExecutionException ignored) {
+        }
     }
 
     /**
