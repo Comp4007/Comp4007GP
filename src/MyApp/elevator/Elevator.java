@@ -4,6 +4,7 @@ import MyApp.Floor;
 import MyApp.misc.*;
 import MyApp.timer.Timer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -66,8 +67,12 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     private int timeDuration;
     /**
      * Use array list become mission queue
+     * One is for elevator move up , one is for elevator move down 
+     * They will clean one direction of mission first, then use other one
+     * This process will repeat
      */
-    private ArrayList<Integer> missionQueue = new ArrayList<Integer>();
+    private ArrayList<Integer> missionQueueUpward = new ArrayList<Integer>();
+    private ArrayList<Integer> missionQueueDownward = new ArrayList<Integer>();
     /**
      * Get the floor list form building for the target number
      */
@@ -90,7 +95,10 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	breakDistance = (Math.pow((minOfMeter/60), 2) / accelerationParameter)*0.5;
     	elevatorId = elevatorCount++;
     	floorList = building.getFloorNames();
-    	addQueue(2);
+    	//TODO Now is okay but no set the timer that stop the destination a few second
+    	//Finish the request and immediately go to second destination
+    	putNewDestination(new Floor("1",16));
+    	putNewDestination(new Floor("B1",4));
     }
 
     /**
@@ -98,7 +106,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * @return
      */
     public final ElevatorStatus getStatus(){
-    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, missionQueue.size());
+    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, missionQueueUpward.size()+missionQueueDownward.size());
     }
 
     public int getElevatorId() {
@@ -121,17 +129,22 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * When elevator accept the request from building, it will rearrange the mission queue
      * @param target
      */
-    public void addQueue(int target){
-    	queue.put(target, id);
-    	missionQueue.add(target);
-    	
+    public void addQueue(int target, ArrayList<Integer> missionQueue,String order){
+    	queue.put(target, id);  	
     	//If the target is already in mission queue, no need to add.
-    	/*if(!missionQueue.contains(target)){
-    		//TODO the rearrange the mission queue(Split two mission queue one is up one is down)
-    	}*/
+    	if(!missionQueue.contains(target)){
+    		//The rearrange the mission queue(Split two mission queue one is up one is down)
+    		if(order.equals("ASC")){
+    			missionQueue.add(target);
+    			Collections.sort(missionQueue);
+    		}else if(order.equals("DSC")){
+    			missionQueue.add(target);
+    			Collections.sort(missionQueue, Collections.reverseOrder());
+    		}
+    	}
     }
     
-    private void simulate(){
+    private void simulate(ArrayList<Integer> missionQueue){
     	int target = missionQueue.get(0);
     	
     	if((target-1) * heightOfFloor < height){
@@ -173,7 +186,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	height += velocity*timeDuration/1000 + 0.5*(acceleration)*Math.pow(timeDuration/1000,2);	
     	if(velocity == 0){
     		height = (target-1) * heightOfFloor;
-    		queue.remove(missionQueue.get(0));
+    		queue.remove(target);
     		missionQueue.remove(0);
     	}
     	log.info(height+", "+velocity+", "+acceleration);
@@ -187,7 +200,13 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 
 	    if (msg.getSender().equals("Timer")) {
 	    	try{
-	    		simulate();
+	    		//At the beginning all elevator should be at the B2 floor
+	    		//So elevator should solve the upward request first
+	    		//if (velocity > 0) {
+	    			simulate(missionQueueUpward);
+	    		//}else if (velocity < 0) {
+	    		//	simulate(missionQueueDownward);
+	    		//}
 	    	}catch(Exception e){
 	    		
 	    	}
@@ -219,21 +238,21 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	//Get the floor height plus breaking distance to compare with the height of elevator (Use the top(y position) of elevator as the height)
     	//First check the direction of elevator, if it is moving down(The height of elevator - 4m(height of floor)), y displacement + breaking distance
     	//if it is moving up, y displacement - breaking distance
-    	if (velocity > 0) {
+    	if (velocity > 0 || height == 0) {
     		//Moving up
     		if(height < floor.getYDisplacement() - breakDistance){
     			availableStop = true;
-    			//Add the request to mission queue, but the queue must rearrange
-    			addQueue(getFloorIndex(floor.getName()));
+    			//Add the request to mission queue, but the queue must rearrange (ascending order)
+    			addQueue(getFloorIndex(floor.getName()),missionQueueUpward,"ASC");
     		}else{
     			availableStop = false;
     		}
-        } else if (velocity < 0) {
+        } else if (velocity < 0 || height == 60) {
         	//Moving down
         	if(height-heightOfFloor > floor.getYDisplacement() + breakDistance){
         		availableStop = true;
-        		//Add the request to mission queue, but the queue must rearrange
-        		addQueue(getFloorIndex(floor.getName()));
+        		//Add the request to mission queue, but the queue must rearrange (descending order)
+        		addQueue(getFloorIndex(floor.getName()),missionQueueDownward,"DSC");
     		}else{
     			availableStop = false;
     		}
