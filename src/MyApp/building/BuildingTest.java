@@ -1,79 +1,96 @@
 package MyApp.building;
 
+import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 public class BuildingTest {
-    @org.junit.Test
+    @Before
+    public void setUp() throws Exception {
+
+    }
+
+    @After
+    public void tearDown() throws Exception {
+
+    }
+
+    // ==
+
+    @Test
     public void main() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void startApp() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getLogger() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void putThread() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getThread() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getThreads() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getProperty() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getElevatorQueue() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getKioskQueue() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getElevatorStatus() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getTotalDisplacementMeters() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getFloorPositions() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getFloorNames() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void getFloorPosition() throws Exception {
 
     }
 
-    @org.junit.Test
+    @Test
     public void putNewHopRequest() throws Exception {
 
     }
