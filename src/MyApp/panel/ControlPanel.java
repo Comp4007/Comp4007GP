@@ -13,7 +13,7 @@ import java.util.Hashtable;
 import java.util.stream.Collectors;
 
 public class ControlPanel implements Panel {
-    private static final long statusRefreshMiliseconds = 100;
+    private static final long statusRefreshMiliseconds = 200;
 
     private final Building building;
     private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorStatus = new Hashtable<>();
