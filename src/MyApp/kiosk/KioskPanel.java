@@ -17,6 +17,7 @@ import MyApp.panel.Panel;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.awt.event.ActionEvent;
 import javax.swing.JTextField;
@@ -31,6 +32,7 @@ public class KioskPanel implements Panel{
 	private Building building;
 	private String[] floorList;
 
+	@Override
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
             try {
@@ -40,7 +42,18 @@ public class KioskPanel implements Panel{
             }
         });
 	}
-	
+
+	@Override
+	public void dismissInfo() {
+		EventQueue.invokeLater(() -> {
+			try {
+				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
 	public KioskPanel(Building building) {
 		this.building = building;
 		floorList = building.getFloorNames();
