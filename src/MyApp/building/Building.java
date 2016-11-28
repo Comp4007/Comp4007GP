@@ -227,7 +227,7 @@ public class Building {
      * Getting the specify thread. Also get the thread's attribute. <br/>
      * E.g.:
      * <code>Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus()</code>
-     * â†’ get the e1(Elevator 2) status
+     * þýþýget the e1(Elevator 2) status
      *
      * @param id The element identifier for the simulation object.
      */

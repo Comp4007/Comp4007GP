@@ -11,13 +11,14 @@ import MyApp.building.Building;
 
 public class Kiosk extends AppThread {
 	public static int kioskCount = 0;
+	private KioskPanel kp;
 	private Floor floor;
 	
     public Kiosk(String id, Building building) {
     	super(id, building);
     	this.floor = (Floor) building.getFloorPositions().values().toArray()[kioskCount];
     	kioskCount++;
-    	
+    	kp = new KioskPanel(building);
     }
 
     public Floor getFloor() {
@@ -27,28 +28,30 @@ public class Kiosk extends AppThread {
     public void setFloor(Floor floor) {
         this.floor = floor;
     }
-
-    public boolean addRequest(String target){
+    
+    public String addRequest(String target){
     	// String elevatorID = building.getResult(target, id);
 
-        Elevator assignedTo;
+        Elevator assignedTo = null;
         try {
             assignedTo = this.building.putNewHopRequest(this, target);
         } catch (IndexOutOfBoundsException e) {
-            return false;
+        	return "Error! please try again!";
         }
-
-        log.info("Floor" + target + "request assigned to elevator " + assignedTo.getID());
-        //update GUI
-
-        return false;
+        
+        if(assignedTo != null){
+        	log.info("Floor" + target + "request assigned to elevator " + assignedTo.getID());
+        	return "Floor" + target + "request assigned to elevator " + assignedTo.getID();
+        }
+        return "Assigned not success.";
     }
 
-    protected boolean readKeypad(String destFloor){
-    	return addRequest(destFloor);//dummy
+    protected String readKeypad(String destFloor){
+    	System.out.println(super.id + "/" + destFloor);
+    	return addRequest(destFloor);//dummy	
     }
     
-    protected boolean readRFID(int id){
+    protected String readRFID(int id){
         String destFloor = "";
     	return addRequest(destFloor);//dummy
     }
