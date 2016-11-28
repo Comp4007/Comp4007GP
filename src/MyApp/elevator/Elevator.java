@@ -146,7 +146,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     	int target = missionQueue.get(0);
     	
     	if((target-1) * heightOfFloor < height){
-    		if(velocity > -2 || velocity != 0){
+    		if(velocity > -1 * minOfMeter || velocity != 0){
     			acceleration = -accelerationParameter;
     		}
     		if(((target-1) * heightOfFloor + breakDistance) >= height){
@@ -158,14 +158,14 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         	if(velocity > 0){
         		velocity = 0;
         		acceleration = 0;
-	        }else if(velocity < -2){
-	        		velocity = -2;
+	        }else if(velocity < -1 * minOfMeter){
+	        		velocity = -1 * minOfMeter;
 	        		acceleration = 0;
 	        }	
 		}
     	
     	if((target-1) * heightOfFloor > height){
-    		if(velocity < 2 || velocity != 0){
+    		if(velocity < minOfMeter || velocity != 0){
     			acceleration = accelerationParameter;
     		}
     		if(((target-1) * heightOfFloor - breakDistance) <= height){
@@ -176,8 +176,8 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         	if(velocity < 0){
         		velocity = 0;
         		acceleration = 0;
-	        }else if(velocity > 2){
-	        		velocity = 2;
+	        }else if(velocity > minOfMeter){
+	        		velocity = minOfMeter;
 	        		acceleration = 0;
 	        }     
 		}		
