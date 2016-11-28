@@ -1,29 +1,14 @@
 package MyApp.kiosk;
 
 import MyApp.building.Building;
-
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import javax.swing.JLabel;
-import java.awt.GridBagConstraints;
-import javax.swing.JComboBox;
-import java.awt.Insets;
-
 import MyApp.building.Floor;
 import MyApp.panel.Panel;
 
-import javax.swing.JButton;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.util.Arrays;
-import java.awt.event.ActionEvent;
-import java.util.logging.Level;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 
 public class KioskPanel implements Panel{
 	private String keypadText = "";
@@ -279,7 +264,7 @@ public class KioskPanel implements Panel{
 		gbc_btnDelete.insets = new Insets(0, 0, 0, 5);
 		gbc_btnDelete.gridx = 1;
 		gbc_btnDelete.gridy = 6;
-		btnDelete.addActionListener(new ActionListener() { 
+		btnDelete.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent e) { 
 				    if (keypadText != null && keypadText.length() > 0 ) {
 				    	keypadText = keypadText.substring(0, keypadText.length()-1);
@@ -304,7 +289,7 @@ public class KioskPanel implements Panel{
 			  }
 
 			private void submitFloor(Floor floor, String dest) {
-                building.getLogger().log(Level.INFO, "clicked submitFloor");
+                building.getLogger().info("clicked submitFloor");
                 Kiosk kiosk = building.getKioskByFloor(floor);
                 kiosk.readKeypad(dest);
 			}
