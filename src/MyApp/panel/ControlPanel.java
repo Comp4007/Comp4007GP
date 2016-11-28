@@ -12,6 +12,8 @@ import java.util.Hashtable;
 import java.util.stream.Collectors;
 
 public class ControlPanel implements Panel {
+    private static final long statusRefreshMiliseconds = 1000;
+
     private final Building building;
     private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorStatus = new Hashtable<>();
     private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorQueue = new Hashtable<>();
@@ -43,7 +45,7 @@ public class ControlPanel implements Panel {
                 this.building.getKiosks().forEach(this::updateKioskQueue);
 
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(statusRefreshMiliseconds);
                 } catch (InterruptedException e) {
                     System.out.println("Control Panel refreshing interrupted");
                     break;
