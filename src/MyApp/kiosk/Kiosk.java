@@ -39,17 +39,19 @@ public class Kiosk extends AppThread {
         } catch (IndexOutOfBoundsException e) {
         	return "Error! please try again!";
         }
-        
-        if(assignedTo != null){
-        	log.info("Floor" + target + " request assigned to elevator " + assignedTo.getID());
+
+        if (assignedTo == null)
+            log.info(String.format("cannot assign for target %s", target));
+        else
+            log.info(String.format("Floor \"%s\" request assigned to elevator %d", target, assignedTo.getElevatorId()));
         	return "Floor" + target + " request assigned to elevator " + assignedTo.getID();
-        }
+    }
         return "Assigned not success.";
     }
 
     protected String readKeypad(String destFloor){
     	System.out.println(this.id + "/" + destFloor);
-    	return addRequest(destFloor);//dummy	
+    	return addRequest(destFloor);//dummy
     }
     
     protected String readRFID(int id){
