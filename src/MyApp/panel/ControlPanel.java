@@ -1,146 +1,227 @@
 package MyApp.panel;
 
 import MyApp.building.Building;
+import MyApp.elevator.Elevator;
+import MyApp.kiosk.Kiosk;
+import MyApp.misc.ElevatorStatus;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.util.Collection;
 
-import java.awt.BorderLayout;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+public class ControlPanel implements Panel {
+    private final Building building;
+    private final Collection<Kiosk> kiosks;
+    private final Collection<Elevator> elevators;
+    private Collection<ElevatorStatus> elevatorStatus;
+    private JFrame frmControlPanel;
 
+    private JPanel panelWrapper;
+    private JPanel panelElevatorsInfo;
+    private JPanel panelKiosksQueuesWrapper;
+    private JLabel lblElevatorStatus;
+    private JLabel lblElevatorQueue;
+    private JLabel lblKioskQueues;
+    private JLabel lblKioskFloor0;
+    private JLabel lblKioskQueue0;
+    private JPanel panelKiosksQueues;
+    private JPanel panelElevatorQueue;
+    private JPanel panelElevatorStatus;
+    private JLabel lblElevatorStatus0;
+    private JLabel lblElevatorStatusTitle0;
+    private JLabel lblElevatorQueueTitle0;
+    private JLabel lblElevatorQueue0;
 
-import javax.swing.JButton;
-import javax.swing.JTextArea;
+    public ControlPanel(Building building) {
+        this.building = building;
+        this.kiosks = this.building.getKiosks();
+        this.elevators = this.building.getElevators();
+        this.elevatorStatus = this.building.getElevatorStatus();
+        this.frmControlPanel = new JFrame("Control Panel");
 
-public class ControlPanel implements Panel{
-	//private JFrame cFrame;
-	private JFrame frame;
-	private JTextArea textarea;
-	private JButton refresh, dismiss;
-	private Building building;
-	
-	/**
-	 * @wbp.parser.entryPoint
-	 */
-	public ControlPanel(Building building){
-		this.building = building;
-		initialize();
-		start();
-	}
+        setupForm();
+    }
 
-	
+    private void setupForm() {
+        frmControlPanel.setSize(400, 500);
+        frmControlPanel.setPreferredSize(new Dimension(400, 500));
+        frmControlPanel.setContentPane(this.panelWrapper);
+        frmControlPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frmControlPanel.pack();
+    }
 
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-	/*	cFrame = new JFrame();
-		cFrame.setTitle("Control Panel");
-		
-		JPanel panel = new JPanel();
-		cFrame.getContentPane().add(panel, BorderLayout.CENTER);
-		
-		JLabel lblNewLabel = new JLabel("New label");
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(46)
-					.addComponent(lblNewLabel)
-					.addContainerGap(617, Short.MAX_VALUE))
-		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
-					.addGap(44)
-					.addComponent(lblNewLabel)
-					.addContainerGap(349, Short.MAX_VALUE))
-		);
-		panel.setLayout(gl_panel);*/
-		
-		textarea= new JTextArea();
-		textarea.setEditable(false);
-		JScrollPane sp = new JScrollPane(textarea);
-		sp.setBounds(10,10,460,590);
-		refresh = new JButton();
-		dismiss = new JButton();
-		refresh.setText("refresh");
-		dismiss.setText("dismiss");
-		frame = new JFrame();
-		frame.setTitle("Control Panel");
-		frame.setBounds(100, 100, 500, 650);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		refresh.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  	showInfo();
-			  }
-		} );
-		
-		dismiss.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  dismissInfo();
-			  }
-		} );
-		frame.getContentPane().add(sp);
-		//frame.add(refresh);
-		//frame.add(dismiss);
-		frame.setVisible(true);
-		sp.setVisible(true);
-		
-	}
-	
-	private void start() {
-		try{
-			while(true){
-				showInfo();
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		
-	}
+    @Override
+    public void showInfo() {
+        EventQueue.invokeLater(() -> {
+            try {
+                frmControlPanel.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
 
-	@Override
-	public void showInfo() {
-		/*
-		System.out.println("Elevator status :");
-		//System.out.println(building.getElevatorStatus());//sample
-		System.out.println();
-		
-		System.out.println("Elevator queue :");
-		//System.out.printf(building.getElevatorQueueString());//sample
-		System.out.println();
-		
-		System.out.println("Kiosk queue: ");
-		System.out.printf(building.getKioskQueueString());*/
-		textarea.setText("");
-		
-		String info = "";
-		
-		info += "Elevator status:\n";
-		//info += building.getElevatorStatus();
-		info += "\n\n";
-		
-		info += "Elevator queue:\n";
-		info +=building.getElevatorQueueString();
-		info += "\n\n";
-		
-		info += "Kiosk queue:\n";
-		info +=building.getKioskQueueString();
-				
-		textarea.append(info);
-
-		frame.setVisible(true);
-		
-	}
     @Override
     public void dismissInfo() {
-    	textarea.setText("");
+        EventQueue.invokeLater(() -> {
+            try {
+                frmControlPanel.dispatchEvent(new WindowEvent(frmControlPanel, WindowEvent.WINDOW_CLOSING));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+
+    {
+// GUI initializer generated by IntelliJ IDEA GUI Designer
+// >>> IMPORTANT!! <<<
+// DO NOT EDIT OR ADD ANY CODE HERE!
+        $$$setupUI$$$();
+    }
+
+    /**
+     * Method generated by IntelliJ IDEA GUI Designer
+     * >>> IMPORTANT!! <<<
+     * DO NOT edit this method OR call it in your code!
+     *
+     * @noinspection ALL
+     */
+    private void $$$setupUI$$$() {
+        panelWrapper = new JPanel();
+        panelWrapper.setLayout(new GridBagLayout());
+        panelElevatorsInfo = new JPanel();
+        panelElevatorsInfo.setLayout(new GridBagLayout());
+        GridBagConstraints gbc;
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        panelWrapper.add(panelElevatorsInfo, gbc);
+        lblElevatorStatus = new JLabel();
+        lblElevatorStatus.setFont(new Font(lblElevatorStatus.getFont().getName(), lblElevatorStatus.getFont().getStyle(), 20));
+        lblElevatorStatus.setText("Elevator Status");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorsInfo.add(lblElevatorStatus, gbc);
+        panelElevatorStatus = new JPanel();
+        panelElevatorStatus.setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panelElevatorsInfo.add(panelElevatorStatus, gbc);
+        lblElevatorStatusTitle0 = new JLabel();
+        lblElevatorStatusTitle0.setText("Elevator {id}:");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorStatus.add(lblElevatorStatusTitle0, gbc);
+        lblElevatorStatus0 = new JLabel();
+        lblElevatorStatus0.setText("{status-elevator-0}");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorStatus.add(lblElevatorStatus0, gbc);
+        lblElevatorQueue = new JLabel();
+        lblElevatorQueue.setFont(new Font(lblElevatorQueue.getFont().getName(), lblElevatorQueue.getFont().getStyle(), 20));
+        lblElevatorQueue.setText("Elevator Queue");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorsInfo.add(lblElevatorQueue, gbc);
+        panelElevatorQueue = new JPanel();
+        panelElevatorQueue.setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panelElevatorsInfo.add(panelElevatorQueue, gbc);
+        lblElevatorQueueTitle0 = new JLabel();
+        lblElevatorQueueTitle0.setText("Elevator {id}:");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorQueue.add(lblElevatorQueueTitle0, gbc);
+        lblElevatorQueue0 = new JLabel();
+        lblElevatorQueue0.setText("{queue-elevator-0}");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelElevatorQueue.add(lblElevatorQueue0, gbc);
+        panelKiosksQueuesWrapper = new JPanel();
+        panelKiosksQueuesWrapper.setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        panelWrapper.add(panelKiosksQueuesWrapper, gbc);
+        lblKioskQueues = new JLabel();
+        lblKioskQueues.setFont(new Font(lblKioskQueues.getFont().getName(), lblKioskQueues.getFont().getStyle(), 20));
+        lblKioskQueues.setText("Kiosk Queue:");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelKiosksQueuesWrapper.add(lblKioskQueues, gbc);
+        panelKiosksQueues = new JPanel();
+        panelKiosksQueues.setLayout(new GridBagLayout());
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panelKiosksQueuesWrapper.add(panelKiosksQueues, gbc);
+        lblKioskFloor0 = new JLabel();
+        lblKioskFloor0.setText("Floor {floor-name}:");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelKiosksQueues.add(lblKioskFloor0, gbc);
+        lblKioskQueue0 = new JLabel();
+        lblKioskQueue0.setText("{queue}");
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.weightx = 5.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panelKiosksQueues.add(lblKioskQueue0, gbc);
+    }
+
+    /**
+     * @noinspection ALL
+     */
+    public JComponent $$$getRootComponent$$$() {
+        return panelWrapper;
     }
 }
+
