@@ -60,12 +60,12 @@ public class Kiosk extends AppThread {
     private void finishRequest(String elevatorID){
     	//delete all element in queue with this elevatorID
     }
-    
+
     public void run() {
 		//create GUI with RFID/keypad input
     	Msg msg = mbox.receive();
 	    //System.out.println(id + ": Received msg: " + msg);
-    	
+
     	//call finish request if elevator tell kiosk the request is finished
     }
 }

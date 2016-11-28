@@ -11,7 +11,7 @@ import MyApp.kiosk.Kiosk;
 
 public class Elevator extends AppThread implements Comparable<Elevator> {
 	/**
-	 * This is count number of elevator. Also for building getElevatorQueue() to get no. of elevator
+	 * This is count number of elevator. Also for building getElevatorQueueString() to get no. of elevator
 	 */
 	public static int elevatorCount = 0;
 
