@@ -48,7 +48,7 @@ public class Kiosk extends AppThread {
     }
 
     protected String readKeypad(String destFloor){
-    	System.out.println(super.id + "/" + destFloor);
+    	System.out.println(this.id + "/" + destFloor);
     	return addRequest(destFloor);//dummy	
     }
     
@@ -59,9 +59,16 @@ public class Kiosk extends AppThread {
     	return addRequest(destFloor);//dummy
     }
     
+    protected void elevatorIn(){
+    	 building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
+    	 //TODO search if any elevator is arrived 
+    	 finishRequest("");
+    }
+    
     public HashMap<Integer, String> getQueue(){
     	return queue;
     }
+    
     //TODO:  finishRequest
     private void finishRequest(String elevatorID){
     	//delete all element in queue with this elevatorID
