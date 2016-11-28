@@ -23,6 +23,7 @@ import MyApp.panel.AdminPanel;
 import MyApp.panel.ControlPanel;
 import MyApp.panel.Panel;
 import MyApp.timer.Timer;
+import javafx.scene.layout.Pane;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -47,6 +48,10 @@ public class Building {
      */
     private Hashtable<String, AppThread> appThreads = null;
     /**
+     * Storage for all panels instances.
+     */
+    private LinkedList<Panel> panels = new LinkedList<>();
+    /**
      * Accessors for different properties in this building configuration.
      */
     private Properties cfgProps = null;
@@ -70,8 +75,11 @@ public class Building {
     /**
      * Holds the single-thread pool of reference of the thread that refreshes the cache of statuses of all elevators.<br/>
      * Note that using FixedThreadPool to reduce resource and time overheads for the cache refresher to run.
+     *
      * @see java.util.concurrent.Executors
+     * @see java.util.concurrent.ThreadPoolExecutor
      * @see java.util.concurrent.Executor
+     * @see java.util.concurrent.ExecutorService
      */
     private Executor executorBuildingRefreshElevatorStatusCache = Executors.newFixedThreadPool(1);
 
@@ -93,10 +101,10 @@ public class Building {
         java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                System.out.println("caught a application exit signal.");
-                building.appThreads.forEach((n, t) -> {
-
-                });
+                System.out.println("caught an application exit signal.");
+                building.appThreads.values().forEach(AppThread::interrupt);
+                building.panels.forEach(Panel::dismissInfo);
+                window.dismissInfo();
             }
         });
 
@@ -107,16 +115,17 @@ public class Building {
     /**
      * Initialisation of the Building simulation element. <br/>
      * It will also instantiate all lifts, kiosks, control panels and other related stuffs.
+     *
      * @throws InvalidPropertiesFormatException When the <code>*.cfg</code> file is missing one of following of properties:
-     * <ul>
-     *     <li><code>DisplacementMeters</code></li>
-     *     <li><code>FloorNames</code></li>
-     *     <li><code>FloorPositions</code></li>
-     * </ul>
-     * or
-     * <ul>
-     *     <li>Amount of <code>floorNames</code> is not the same as that of <code>floorPositions</code>.</li>
-     * </ul>
+     *                                          <ul>
+     *                                          <li><code>DisplacementMeters</code></li>
+     *                                          <li><code>FloorNames</code></li>
+     *                                          <li><code>FloorPositions</code></li>
+     *                                          </ul>
+     *                                          or
+     *                                          <ul>
+     *                                          <li>Amount of <code>floorNames</code> is not the same as that of <code>floorPositions</code>.</li>
+     *                                          </ul>
      */
     public Building() throws InvalidPropertiesFormatException {
         // read system config from property file
@@ -197,27 +206,32 @@ public class Building {
         int kc = new Integer(this.getProperty("Kiosks"));
         for (int i = 0; i < kc; i++) {
             Kiosk kiosk = new Kiosk("k" + i, this);
-            new Thread(kiosk).start();
+            kiosk.start();
+            this.appThreads.put(kiosk.getID(), kiosk);
         }
 
         // Create elevator e0 = elevator 1, e1 = elevator 2 ......
         int e = new Integer(this.getProperty("Elevators"));
         for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
-            new Thread(elevator).start();
+            elevator.start();
+            this.appThreads.put(elevator.getID(), elevator);
         }
 
         startElevatorStatusCacheThread();
 
         // This is for elevator use implement by steven and kers
-        new Thread(timer).start();
+        timer.start();
+        this.appThreads.put(timer.getID(), timer);
 
         // Wait all the thread object created. Then open control panel GUI
-        Panel cp = new ControlPanel(this);
-        cp.showInfo();
+        ControlPanel controlPanel = new ControlPanel(this);
+        this.panels.add(controlPanel);
+        controlPanel.showInfo();
 
         // show kiosk panel for testing
         KioskPanel kioskPanel = new KioskPanel(this);
+        this.panels.add(kioskPanel);
         kioskPanel.showInfo();
     }
 
@@ -291,7 +305,7 @@ public class Building {
      * @return A string representation of the status of the elevators queues.
      * @see ControlPanel
      */
-    public String getElevatorQueue() {
+    public String getElevatorQueueString() {
         String geq = "";
 
         for (Elevator e : getThreads(Elevator.class)) {
@@ -306,7 +320,7 @@ public class Building {
      * @return A string representation of the status of the kiosk queue.
      * @see ControlPanel
      */
-    public String getKioskQueue() {
+    public String getKioskQueueString() {
         String gkq = "";
 
         for (int i = 0; i < Kiosk.kioskCount; i++) {
