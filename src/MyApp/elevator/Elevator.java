@@ -150,7 +150,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     			acceleration = -accelerationParameter;
     		}
     		if(((target-1) * heightOfFloor + breakDistance) >= height){
-    			log.info("should break");
+    			log.info("should brake");
         		acceleration = accelerationParameter;
         	}
         	velocity = velocity+acceleration * timeDuration/1000;
