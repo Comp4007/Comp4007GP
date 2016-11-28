@@ -1,7 +1,7 @@
 package MyApp.timer;
 
 import MyApp.misc.*;
-import MyApp.Building;
+import MyApp.building.Building;
 
 import java.lang.Thread;
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class Timer extends AppThread {
     private void chkTimeout() {
 	long currentTime = (new Date()).getTime();
 	ArrayList<ActiveTimer> timeoutTimers = new ArrayList<ActiveTimer>();
-	log.info("Timer chk...");
+	//log.info("Timer chk...");
 
 	for (ActiveTimer timer : timerList) {
 	    if (timer.timeout(currentTime)) {
@@ -132,7 +132,7 @@ public class Timer extends AppThread {
     // setTimer
     public static int setTimer(String id, long sleepTime) {
 	int timerID = (new Random()).nextInt(9000) + 1000;
-	//timerMBox.send(new Msg(id, 0, "set timer, "+sleepTime+", "+timerID));
+	timerMBox.send(new Msg(id, 0, "set timer, "+sleepTime+", "+timerID));
 	return timerID;
     } // setTimer
 
@@ -156,15 +156,15 @@ public class Timer extends AppThread {
 
 	// add this new timer to timer list
 	timerList.add(new ActiveTimer(timerID, wakeupTime, caller));
-	log.info(id+": "+caller+" setting timer: "+
-		"["+sleepTime+"], ["+timerID+"]");
+	//log.info(id+": "+caller+" setting timer: "+
+		//"["+sleepTime+"], ["+timerID+"]");
     } // set
 
 
     //------------------------------------------------------------
     // cancelTimer
     public static void cancelTimer(String id, int timerID) {
-	//timerMBox.send(new Msg(id, 1, "cancel timer, "+timerID));
+	timerMBox.send(new Msg(id, 1, "cancel timer, "+timerID));
     } // cancelTimer
 
 

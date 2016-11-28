@@ -12,10 +12,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -29,43 +28,66 @@ import javax.swing.JLabel;
 public class AdminPanel implements Panel{
 	private JFrame frame;
 	private JTable table;
+	private final String dbFName = "etc/RFID_DB";
+
 	public AdminPanel(){
-		
-	}
-	
-	public AdminPanel(String signal){
 		initialize();
 	}
 	
 	@Override
 	public void showInfo() {
-		EventQueue.invokeLater(new Runnable() {
-			
-			public void run() {
-				try {
-					AdminPanel window = new AdminPanel("Open");
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
-	
-	/**
+
+    @Override
+    public void dismissInfo() {
+        EventQueue.invokeLater(() -> {
+            try {
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
 		frame = new JFrame();
 		table = new JTable();
-
-		// create a table model and set a Column Identifiers to this model 
-        Object[] columns = {"Id","Floor","First Name","Last Name"};
         DefaultTableModel model = new DefaultTableModel();
-        model.setColumnIdentifiers(columns);
         
-        // set the model to the table
+        // set the model to the table and add original data from RFID DB
         table.setModel(model);
+        try{
+        	BufferedReader in = new BufferedReader(new FileReader(dbFName));
+        	String line;
+        	int count = 0;
+        	Object[] columns;
+        	Object[] row;
+        		while((line = in.readLine()) != null)
+        		{
+        			if(count == 0){
+        				columns = line.split(",");
+        				model.setColumnIdentifiers(columns);
+        			}else{
+        				row = line.split(",");
+        				model.addRow(row);
+        			}
+        			count++;
+        		}
+        	in.close();
+        }catch (Exception e){
+        	System.out.println("Error :"+e);
+        }
+       
         // Change A JTable Background Color, Font Size, Font Color, Row Height
         table.setBackground(Color.LIGHT_GRAY);
         table.setForeground(Color.black);
@@ -204,10 +226,9 @@ public class AdminPanel implements Panel{
         
         //jframe property
         frame.setTitle("RFID Admin Panel");
-        frame.setSize(650,435);
+        frame.setSize(667,448);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
 	}
 
 }
