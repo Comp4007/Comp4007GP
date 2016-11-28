@@ -4,6 +4,7 @@ import MyApp.building.Building;
 import MyApp.elevator.Elevator;
 import MyApp.kiosk.Kiosk;
 import MyApp.misc.ElevatorStatus;
+import sun.misc.JavaLangAccess;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,6 +22,11 @@ public class ControlPanel implements Panel {
     private JFrame frmControlPanel;
 
     private JPanel panelWrapper;
+    private JPanel panelElevatorsInfo;
+    private JPanel panelKiosksQueuesWrapper;
+    private JLabel lblElevatorStatus;
+    private JLabel lblElevatorQueue;
+    private JLabel lblKioskQueues;
     private JPanel panelKiosksQueues;
     private JPanel panelElevatorQueue;
     private JPanel panelElevatorStatus;
@@ -245,7 +251,7 @@ public class ControlPanel implements Panel {
     private void $$$setupUI$$$() {
         panelWrapper = new JPanel();
         panelWrapper.setLayout(new GridBagLayout());
-        JPanel panelElevatorsInfo = new JPanel();
+        panelElevatorsInfo = new JPanel();
         panelElevatorsInfo.setLayout(new GridBagLayout());
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
@@ -255,7 +261,7 @@ public class ControlPanel implements Panel {
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         panelWrapper.add(panelElevatorsInfo, gbc);
-        JLabel lblElevatorStatus = new JLabel();
+        lblElevatorStatus = new JLabel();
         lblElevatorStatus.setFont(new Font(lblElevatorStatus.getFont().getName(), lblElevatorStatus.getFont().getStyle(), 20));
         lblElevatorStatus.setText("Elevator Status");
         gbc = new GridBagConstraints();
@@ -274,7 +280,7 @@ public class ControlPanel implements Panel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panelElevatorsInfo.add(panelElevatorStatus, gbc);
-        JLabel lblElevatorQueue = new JLabel();
+        lblElevatorQueue = new JLabel();
         lblElevatorQueue.setFont(new Font(lblElevatorQueue.getFont().getName(), lblElevatorQueue.getFont().getStyle(), 20));
         lblElevatorQueue.setText("Elevator Queue");
         gbc = new GridBagConstraints();
@@ -293,7 +299,7 @@ public class ControlPanel implements Panel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panelElevatorsInfo.add(panelElevatorQueue, gbc);
-        JPanel panelKiosksQueuesWrapper = new JPanel();
+        panelKiosksQueuesWrapper = new JPanel();
         panelKiosksQueuesWrapper.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -302,7 +308,7 @@ public class ControlPanel implements Panel {
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         panelWrapper.add(panelKiosksQueuesWrapper, gbc);
-        JLabel lblKioskQueues = new JLabel();
+        lblKioskQueues = new JLabel();
         lblKioskQueues.setFont(new Font(lblKioskQueues.getFont().getName(), lblKioskQueues.getFont().getStyle(), 20));
         lblKioskQueues.setText("Kiosk Queue:");
         gbc = new GridBagConstraints();
