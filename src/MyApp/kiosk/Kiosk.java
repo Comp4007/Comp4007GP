@@ -40,7 +40,10 @@ public class Kiosk extends AppThread {
             return false;
         }
 
-        log.info("Floor" + target + "request assigned to elevator " + assignedTo.getID());
+        if (assignedTo == null)
+            log.info(String.format("cannot assign for target %s", target));
+        else
+            log.info(String.format("Floor \"%s\" request assigned to elevator %d", target, assignedTo.getElevatorId()));
         //update GUI
 
         return false;
