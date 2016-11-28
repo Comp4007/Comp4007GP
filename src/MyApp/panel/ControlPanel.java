@@ -4,6 +4,8 @@ import MyApp.building.Building;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import java.awt.BorderLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -28,6 +30,7 @@ public class ControlPanel implements Panel{
 	public ControlPanel(Building building){
 		this.building = building;
 		initialize();
+		start();
 	}
 
 	
@@ -60,15 +63,17 @@ public class ControlPanel implements Panel{
 		);
 		panel.setLayout(gl_panel);*/
 		
-		textarea= new JTextArea(10,40);
+		textarea= new JTextArea();
 		textarea.setEditable(false);
+		JScrollPane sp = new JScrollPane(textarea);
+		sp.setBounds(10,10,460,590);
 		refresh = new JButton();
 		dismiss = new JButton();
 		refresh.setText("refresh");
 		dismiss.setText("dismiss");
 		frame = new JFrame();
 		frame.setTitle("Control Panel");
-		frame.setBounds(100, 100, 507, 323);
+		frame.setBounds(100, 100, 500, 650);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		refresh.addActionListener(new ActionListener() { 
@@ -82,15 +87,25 @@ public class ControlPanel implements Panel{
 				  dismissInfo();
 			  }
 		} );
-		//JPanel jp = new JPanel();
-		//jp.add(textarea);
-		frame.add(textarea);
-		frame.add(refresh);
-		frame.add(dismiss);
-		
+		frame.getContentPane().add(sp);
+		//frame.add(refresh);
+		//frame.add(dismiss);
+		frame.setVisible(true);
+		sp.setVisible(true);
 		
 	}
 	
+	private void start() {
+		try{
+			while(true){
+				showInfo();
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+	}
+
 	@Override
 	public void showInfo() {
 		/*
