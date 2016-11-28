@@ -8,13 +8,15 @@ import MyApp.misc.ElevatorStatus;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.util.Collection;
+import java.util.Hashtable;
+import java.util.stream.Collectors;
 
 public class ControlPanel implements Panel {
     private final Building building;
-    private final Collection<Kiosk> kiosks;
-    private final Collection<Elevator> elevators;
-    private Collection<ElevatorStatus> elevatorStatus;
+    private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorStatus = new Hashtable<>();
+    private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorQueue = new Hashtable<>();
+    private final Hashtable<Kiosk, Tuple<JLabel, JLabel>> labelsKioskQueue = new Hashtable<>();
+    private Thread threadControlPanelRefresh;
     private JFrame frmControlPanel;
 
     private JPanel panelWrapper;
@@ -23,24 +25,32 @@ public class ControlPanel implements Panel {
     private JLabel lblElevatorStatus;
     private JLabel lblElevatorQueue;
     private JLabel lblKioskQueues;
-    private JLabel lblKioskFloor0;
-    private JLabel lblKioskQueue0;
     private JPanel panelKiosksQueues;
     private JPanel panelElevatorQueue;
     private JPanel panelElevatorStatus;
-    private JLabel lblElevatorStatus0;
-    private JLabel lblElevatorStatusTitle0;
     private JLabel lblElevatorQueueTitle0;
-    private JLabel lblElevatorQueue0;
 
     public ControlPanel(Building building) {
         this.building = building;
-        this.kiosks = this.building.getKiosks();
-        this.elevators = this.building.getElevators();
-        this.elevatorStatus = this.building.getElevatorStatus();
         this.frmControlPanel = new JFrame("Control Panel");
 
         setupForm();
+
+        this.threadControlPanelRefresh = new Thread(() -> {
+            while (true) {
+                this.building.getElevatorStatus().forEach(this::updateElevatorStatus);
+                this.building.getElevators().forEach(this::updateElevatorQueue);
+                this.building.getKiosks().forEach(this::updateKioskQueue);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    System.out.println("Control Panel refreshing interrupted");
+                    break;
+                }
+            }
+        }, "threadControlPanelRefresh");
+        this.threadControlPanelRefresh.start();
     }
 
     private void setupForm() {
@@ -73,6 +83,155 @@ public class ControlPanel implements Panel {
         });
     }
 
+
+    private synchronized void addElevatorStatus(ElevatorStatus elevatorStatus) {
+        GridBagConstraints gbc;
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = this.labelsElevatorStatus.size();
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblElevatorStatusTitle0 = new JLabel();
+        lblElevatorStatusTitle0.setText(String.format("Elevator %s:", elevatorStatus.getElevator().getID()));
+        panelElevatorStatus.add(lblElevatorStatusTitle0, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = this.labelsElevatorStatus.size();
+        gbc.weightx = 5.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel lblElevatorStatus0 = new JLabel();
+        lblElevatorStatus0.setText(
+                String.format(
+                        "YPos = %.2f m, Spd = %.2f m/s, Acc = %.2f m/s/s",
+                        elevatorStatus.getYPosition(),
+                        elevatorStatus.getVelocity(),
+                        elevatorStatus.getAcceleration()
+                )
+        );
+        panelElevatorStatus.add(lblElevatorStatus0, gbc);
+
+        this.labelsElevatorStatus.put(elevatorStatus.getElevator(), new Tuple<>(lblElevatorStatusTitle0, lblElevatorStatus0));
+    }
+
+    public synchronized void updateElevatorStatus(ElevatorStatus elevatorStatus) {
+        Tuple<JLabel, JLabel> labels = this.labelsElevatorStatus.get(elevatorStatus.getElevator());
+
+        if (labels == null) {
+            this.addElevatorStatus(elevatorStatus);
+            return;
+        }
+
+        labels.y.setText(
+                String.format(
+                        "YPos = %.2f m, Spd = %.2f m/s, Acc = %.2f m/s/s",
+                        elevatorStatus.getYPosition(),
+                        elevatorStatus.getVelocity(),
+                        elevatorStatus.getAcceleration()
+                )
+        );
+    }
+
+    private synchronized void addElevatorQueue(Elevator elevator) {
+        GridBagConstraints gbc;
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = this.labelsElevatorQueue.size();
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JLabel lblElevatorQueueTitle0 = new JLabel();
+        lblElevatorQueueTitle0.setText(
+                String.format("Elevator %s:", elevator.getID())
+        );
+        panelElevatorQueue.add(lblElevatorQueueTitle0, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = this.labelsElevatorQueue.size();
+        gbc.weightx = 5.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel lblElevatorQueue0 = new JLabel();
+        lblElevatorQueue0.setText(
+                String.format(
+                        "[%s]",
+                        String.join(", ", elevator.getQueue().values())
+                )
+        );
+        panelElevatorQueue.add(lblElevatorQueue0, gbc);
+
+        this.labelsElevatorQueue.put(elevator, new Tuple<>(lblElevatorQueueTitle0, lblElevatorQueue0));
+    }
+
+    public synchronized void updateElevatorQueue(Elevator elevator) {
+        Tuple<JLabel, JLabel> labels = this.labelsElevatorQueue.get(elevator);
+
+        if (labels == null) {
+            this.addElevatorQueue(elevator);
+            return;
+        }
+
+        String[] floorNames = building.getFloorNames();
+
+        labels.y.setText(
+                String.format(
+                        "[%s]",
+                        String.join(", ", elevator.getQueue().keySet().stream().map(i -> floorNames[i]).collect(Collectors.toList()))
+                )
+        );
+    }
+
+    private synchronized void addKioskQueue(Kiosk kiosk) {
+        GridBagConstraints gbc;
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = this.labelsKioskQueue.size();
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel lblKioskFloor0 = new JLabel();
+        lblKioskFloor0.setText(
+                String.format("Floor %s:", kiosk.getFloor().getName())
+        );
+        panelKiosksQueues.add(lblKioskFloor0, gbc);
+
+        gbc = new GridBagConstraints();
+        gbc.gridx = 1;
+        gbc.gridy = this.labelsKioskQueue.size();
+        gbc.weightx = 5.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JLabel lblKioskQueue0 = new JLabel();
+        lblKioskQueue0.setText(
+                String.format(
+                        "[%s]",
+                        String.join(", ", kiosk.getQueue().values())
+                )
+        );
+        panelKiosksQueues.add(lblKioskQueue0, gbc);
+
+        this.labelsKioskQueue.put(kiosk, new Tuple<>(lblKioskFloor0, lblKioskQueue0));
+    }
+
+    public synchronized void updateKioskQueue(Kiosk kiosk) {
+        Tuple<JLabel, JLabel> labels = this.labelsKioskQueue.get(kiosk);
+
+        if (labels == null) {
+            this.addKioskQueue(kiosk);
+            return;
+        }
+
+        labels.y.setText(
+                String.format(
+                        "[%s]",
+                        String.join(", ", kiosk.getQueue().values())
+                )
+        );
+    }
 
     {
 // GUI initializer generated by IntelliJ IDEA GUI Designer
@@ -120,22 +279,6 @@ public class ControlPanel implements Panel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panelElevatorsInfo.add(panelElevatorStatus, gbc);
-        lblElevatorStatusTitle0 = new JLabel();
-        lblElevatorStatusTitle0.setText("Elevator {id}:");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelElevatorStatus.add(lblElevatorStatusTitle0, gbc);
-        lblElevatorStatus0 = new JLabel();
-        lblElevatorStatus0.setText("{status-elevator-0}");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weightx = 1.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelElevatorStatus.add(lblElevatorStatus0, gbc);
         lblElevatorQueue = new JLabel();
         lblElevatorQueue.setFont(new Font(lblElevatorQueue.getFont().getName(), lblElevatorQueue.getFont().getStyle(), 20));
         lblElevatorQueue.setText("Elevator Queue");
@@ -155,22 +298,6 @@ public class ControlPanel implements Panel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panelElevatorsInfo.add(panelElevatorQueue, gbc);
-        lblElevatorQueueTitle0 = new JLabel();
-        lblElevatorQueueTitle0.setText("Elevator {id}:");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelElevatorQueue.add(lblElevatorQueueTitle0, gbc);
-        lblElevatorQueue0 = new JLabel();
-        lblElevatorQueue0.setText("{queue-elevator-0}");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weightx = 1.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelElevatorQueue.add(lblElevatorQueue0, gbc);
         panelKiosksQueuesWrapper = new JPanel();
         panelKiosksQueuesWrapper.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
@@ -199,22 +326,6 @@ public class ControlPanel implements Panel {
         gbc.anchor = GridBagConstraints.NORTH;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panelKiosksQueuesWrapper.add(panelKiosksQueues, gbc);
-        lblKioskFloor0 = new JLabel();
-        lblKioskFloor0.setText("Floor {floor-name}:");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 1.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelKiosksQueues.add(lblKioskFloor0, gbc);
-        lblKioskQueue0 = new JLabel();
-        lblKioskQueue0.setText("{queue}");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 5.0;
-        gbc.anchor = GridBagConstraints.WEST;
-        panelKiosksQueues.add(lblKioskQueue0, gbc);
     }
 
     /**
@@ -225,3 +336,13 @@ public class ControlPanel implements Panel {
     }
 }
 
+@SuppressWarnings("WeakerAccess")
+class Tuple<X, Y> {
+    public final X x;
+    public final Y y;
+
+    public Tuple(X x, Y y) {
+        this.x = x;
+        this.y = y;
+    }
+}

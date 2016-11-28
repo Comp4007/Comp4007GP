@@ -76,15 +76,10 @@ public class Building {
      */
     private Properties cfgProps = null;
     /**
-     * Holds the single-thread pool of reference of the thread that refreshes the cache of statuses of all elevators.<br/>
+     * Holds the thread that refreshes the cache of statuses of all elevators.<br/>
      * Note that using FixedThreadPool to reduce resource and time overheads for the cache refresher to run.
-     *
-     * @see java.util.concurrent.Executors
-     * @see java.util.concurrent.ThreadPoolExecutor
-     * @see java.util.concurrent.Executor
-     * @see java.util.concurrent.ExecutorService
      */
-    private Executor executorBuildingRefreshElevatorStatusCache = Executors.newFixedThreadPool(1);
+    private Thread threadBuildingRefreshElevatorStatusCache;
 
     /**
      * Initialisation of the Building simulation element. <br/>
@@ -254,13 +249,19 @@ public class Building {
      * Ensures that the elevator status cache thread is running. Create new thread if not exist or not alive.
      */
     private void startElevatorStatusCacheThread() {
-        try {
-            executorBuildingRefreshElevatorStatusCache.execute(() -> {
+        this.threadBuildingRefreshElevatorStatusCache = new Thread(() -> {
+            while (true) {
                 Collection<Elevator> elevators = this.getThreads(Elevator.class);
                 elevators.forEach(e -> this.elevatorsStatuses.put(e, e.getStatus()));
-            });
-        } catch (RejectedExecutionException ignored) {
-        }
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    System.out.println("BuildingRefreshElevatorStatusCache interrupted");
+                    break;
+                }
+            }
+        }, "threadBuildingRefreshElevatorStatusCache");
+        this.threadBuildingRefreshElevatorStatusCache.start();
     }
 
     /**
