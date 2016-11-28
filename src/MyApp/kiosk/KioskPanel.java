@@ -45,26 +45,21 @@ public class KioskPanel implements Panel{
             }
         });
 	}
-<<<<<<< HEAD
 	
-	/**
-	 * Constructor of Kiosk panel 
-	 * @param building
-	 */
-=======
 
-	@Override
 	public void dismissInfo() {
 		EventQueue.invokeLater(() -> {
 			try {
-				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+				frmKoiskPanel.dispatchEvent(new WindowEvent(frmKoiskPanel, WindowEvent.WINDOW_CLOSING));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
 	}
-
->>>>>>> origin/master
+	/**
+	 * Constructor of Kiosk panel 
+	 * @param building
+	 */
 	public KioskPanel(Building building) {
 		this.building = building;
 		floorList = building.getFloorNames();
@@ -82,10 +77,10 @@ public class KioskPanel implements Panel{
 		frmKoiskPanel.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
-		frmKoiskPanel.getContentPane().add(panel, BorderLayout.CENTER);
+		frmKoiskPanel.getContentPane().add(panel, BorderLayout.NORTH);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{83, 156, 0, 0};
-		gbl_panel.rowHeights = new int[]{23, 53, 0, 45, 69, 0, 0};
+		gbl_panel.rowHeights = new int[]{23, 53, 0, 58, 78, 39, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
@@ -139,7 +134,6 @@ public class KioskPanel implements Panel{
 		gbc_lblRfidReader.gridy = 3;
 		panel.add(lblRfidReader, gbc_lblRfidReader);
 
-<<<<<<< HEAD
 		JComboBox Keypadbox = new JComboBox(floorList);
 		Keypadbox.setEditable(true);
 		GridBagConstraints gbc_Keypadbox = new GridBagConstraints();
@@ -154,14 +148,14 @@ public class KioskPanel implements Panel{
 		GridBagConstraints gbc_btnSummit = new GridBagConstraints();
 		gbc_btnSummit.gridwidth = 2;
 		gbc_btnSummit.fill = GridBagConstraints.BOTH;
-		gbc_btnSummit.insets = new Insets(0, 0, 0, 5);
+		gbc_btnSummit.insets = new Insets(0, 0, 5, 5);
 		gbc_btnSummit.gridx = 0;
 		gbc_btnSummit.gridy = 5;
 		btnSummit.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
 				  if(Arrays.asList(floorList).contains(Keypadbox.getSelectedItem().toString())){
+				      building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk clicked submitFloor");
 					  displayText = ((Kiosk) building.getThread("k" + Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString()) ) ).readKeypad(Keypadbox.getSelectedItem().toString() );
-				  
 					display.setText(displayText);
 				  }else{
 					  displayText = "Wrong Floor Input, please try again.";
@@ -170,30 +164,6 @@ public class KioskPanel implements Panel{
 			  }
 		} );
 		panel.add(btnSummit, gbc_btnSummit);
-		
-=======
-		JButton btnSubmit = new JButton("Submit");
-		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
-		gbc_btnSubmit.fill = GridBagConstraints.BOTH;
-		gbc_btnSubmit.insets = new Insets(0, 0, 0, 5);
-		gbc_btnSubmit.gridx = 2;
-		gbc_btnSubmit.gridy = 6;
-        btnSubmit.addActionListener(new ActionListener() {
-			  public void actionPerformed(ActionEvent e) {
-                  String floorAliasKioskUsing = (String) FloorCbx.getSelectedItem();
-                  Floor floor = building.getFloorPosition(floorAliasKioskUsing);
-                  String dest = keypadDispaly.getText();
-                  submitFloor(floor, dest);
-			  }
-
-			private void submitFloor(Floor floor, String dest) {
-                building.getLogger().log(Level.INFO, "clicked submitFloor");
-                Kiosk kiosk = building.getKioskByFloor(floor);
-                kiosk.readKeypad(dest);
-			}
-		} );
-		panel.add(btnSubmit, gbc_btnSubmit);
->>>>>>> origin/master
 		//=================================================================
 		
 		//RFID reader
@@ -208,6 +178,7 @@ public class KioskPanel implements Panel{
 		
 		JButton btnRfidSummit = new JButton("RFID Summit");
 		GridBagConstraints gbc_btnRfidSummit = new GridBagConstraints();
+		gbc_btnRfidSummit.insets = new Insets(0, 0, 5, 0);
 		gbc_btnRfidSummit.fill = GridBagConstraints.BOTH;
 		gbc_btnRfidSummit.gridx = 2;
 		gbc_btnRfidSummit.gridy = 5;

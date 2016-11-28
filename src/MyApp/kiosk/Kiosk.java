@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import MyApp.building.Building;
-import com.sun.media.jfxmedia.logging.Logger;
 
 
 public class Kiosk extends AppThread {
@@ -27,21 +26,13 @@ public class Kiosk extends AppThread {
         return floor;
     }
 
-<<<<<<< HEAD
+
     public void setFloor(Floor floor) {
         this.floor = floor;
     }
     
     public String addRequest(String target){
-=======
-//    public void setFloor(Floor floor) {
-//        this.floor = floor;
-//    }
-
-    public boolean addRequest(String target){
->>>>>>> origin/master
     	// String elevatorID = building.getResult(target, id);
-
         Elevator assignedTo = null;
         try {
             assignedTo = this.building.putNewHopRequest(this, target);
@@ -50,28 +41,19 @@ public class Kiosk extends AppThread {
         }
         
         if(assignedTo != null){
-        	log.info("Floor" + target + "request assigned to elevator " + assignedTo.getID());
-        	return "Floor" + target + "request assigned to elevator " + assignedTo.getID();
+        	log.info("Floor" + target + " request assigned to elevator " + assignedTo.getID());
+        	return "Floor" + target + " request assigned to elevator " + assignedTo.getID();
         }
         return "Assigned not success.";
     }
 
-<<<<<<< HEAD
     protected String readKeypad(String destFloor){
     	System.out.println(super.id + "/" + destFloor);
     	return addRequest(destFloor);//dummy	
     }
     
     protected String readRFID(int id){
-=======
-    protected boolean readKeypad(String destFloor){
-        building.getLogger().log(Level.INFO, String.format("read keypad, dest = %s", destFloor));
-    	return addRequest(destFloor);//dummy
-    }
-    
-    protected boolean readRFID(int id){
         // TODO: rfid id to floor?
->>>>>>> origin/master
         String destFloor = "";
         building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %d, dest = %s", id, destFloor));
     	return addRequest(destFloor);//dummy
@@ -80,7 +62,7 @@ public class Kiosk extends AppThread {
     public HashMap<Integer, String> getQueue(){
     	return queue;
     }
-    
+    //TODO:  finishRequest
     private void finishRequest(String elevatorID){
     	//delete all element in queue with this elevatorID
     }
