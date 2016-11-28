@@ -20,12 +20,16 @@ public class ControlPanel implements Panel{
 		System.out.println();
 		
 		System.out.println("Elevator queue :");
-		//System.out.printf(building.getElevatorQueue());//sample
+		//System.out.printf(building.getElevatorQueueString());//sample
 		System.out.println();
 		
 		System.out.println("Kiosk queue: ");
-		System.out.printf(building.getKioskQueue());
+		System.out.printf(building.getKioskQueueString());
 		
 	}
-	
+
+    @Override
+    public void dismissInfo() {
+
+    }
 }

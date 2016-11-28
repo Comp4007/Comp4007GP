@@ -12,10 +12,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -47,8 +44,19 @@ public class AdminPanel implements Panel{
             }
         });
 	}
-	
-	/**
+
+    @Override
+    public void dismissInfo() {
+        EventQueue.invokeLater(() -> {
+            try {
+                frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {

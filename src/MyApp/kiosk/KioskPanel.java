@@ -13,12 +13,15 @@ import java.awt.GridBagConstraints;
 import javax.swing.JComboBox;
 import java.awt.Insets;
 
+import MyApp.building.Floor;
 import MyApp.panel.Panel;
 
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import java.awt.Color;
@@ -32,6 +35,7 @@ public class KioskPanel implements Panel{
 	private String displayText = "";
 	private String[] RFIDlist;
 
+	@Override
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
             try {
@@ -41,11 +45,26 @@ public class KioskPanel implements Panel{
             }
         });
 	}
+<<<<<<< HEAD
 	
 	/**
 	 * Constructor of Kiosk panel 
 	 * @param building
 	 */
+=======
+
+	@Override
+	public void dismissInfo() {
+		EventQueue.invokeLater(() -> {
+			try {
+				frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+>>>>>>> origin/master
 	public KioskPanel(Building building) {
 		this.building = building;
 		floorList = building.getFloorNames();
@@ -79,7 +98,7 @@ public class KioskPanel implements Panel{
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
-		System.out.println(Arrays.toString(floorList));
+//		System.out.println(Arrays.toString(floorList));
 		//floor combobox
 		JComboBox FloorCbx = new JComboBox(floorList);
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
@@ -120,6 +139,7 @@ public class KioskPanel implements Panel{
 		gbc_lblRfidReader.gridy = 3;
 		panel.add(lblRfidReader, gbc_lblRfidReader);
 
+<<<<<<< HEAD
 		JComboBox Keypadbox = new JComboBox(floorList);
 		Keypadbox.setEditable(true);
 		GridBagConstraints gbc_Keypadbox = new GridBagConstraints();
@@ -151,6 +171,29 @@ public class KioskPanel implements Panel{
 		} );
 		panel.add(btnSummit, gbc_btnSummit);
 		
+=======
+		JButton btnSubmit = new JButton("Submit");
+		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
+		gbc_btnSubmit.fill = GridBagConstraints.BOTH;
+		gbc_btnSubmit.insets = new Insets(0, 0, 0, 5);
+		gbc_btnSubmit.gridx = 2;
+		gbc_btnSubmit.gridy = 6;
+        btnSubmit.addActionListener(new ActionListener() {
+			  public void actionPerformed(ActionEvent e) {
+                  String floorAliasKioskUsing = (String) FloorCbx.getSelectedItem();
+                  Floor floor = building.getFloorPosition(floorAliasKioskUsing);
+                  String dest = keypadDispaly.getText();
+                  submitFloor(floor, dest);
+			  }
+
+			private void submitFloor(Floor floor, String dest) {
+                building.getLogger().log(Level.INFO, "clicked submitFloor");
+                Kiosk kiosk = building.getKioskByFloor(floor);
+                kiosk.readKeypad(dest);
+			}
+		} );
+		panel.add(btnSubmit, gbc_btnSubmit);
+>>>>>>> origin/master
 		//=================================================================
 		
 		//RFID reader

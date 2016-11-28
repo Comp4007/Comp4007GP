@@ -7,9 +7,6 @@ import java.util.ArrayList;
 // 第 15 章 執行緒（Thread）
 // https://github.com/JustinSDK/JavaSE6Tutorial/blob/master/docs/CH15.md
 
-// 我覺得呢個只係 Joe Sir 想話俾我哋聽 `synchronized` 呢個 reserved 嘅運作係點嘅例子咁解，唔一定要我哋用
-// -- Charles
-
 // ======================================================================
 // MBox
 public class MBox {
@@ -31,7 +28,7 @@ public class MBox {
 	msgCnt++;
 	mqueue.add(msg);
 	log.fine(id + ": send \"" + msg + "\"");
-	notify();
+	notify(); // see ln 44
     } // send
 
     //------------------------------------------------------------
@@ -41,8 +38,7 @@ public class MBox {
 	if (--msgCnt < 0) {
 	    while (true) {
 		try {
-	
-		    wait();
+		    wait(); // see ln 34
 		    break;
 		} catch (InterruptedException e) {
 		    log.warning(id + ".receive: InterruptedException");

@@ -8,7 +8,7 @@ import MyApp.building.Building;
 
 //======================================================================
 // AppThread
-public abstract class AppThread implements Runnable {
+public abstract class AppThread extends Thread {
 	/**
 	 * Represents that the identifier for such object in the building elevator and kiosk system.
 	 */
@@ -42,7 +42,7 @@ public abstract class AppThread implements Runnable {
     public String getID() { return id; }
     public HashMap<Integer, String> getQueue() {return queue;}
     
-    public void setQueue(){
-    	
-    }
-} // AppThread
+    public void setQueue() {
+
+    };
+}
