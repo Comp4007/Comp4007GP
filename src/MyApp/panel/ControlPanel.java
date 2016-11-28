@@ -120,6 +120,8 @@ public class ControlPanel implements Panel{
 		info +=building.getKioskQueueString();
 				
 		textarea.append(info);
+
+		frame.setVisible(true);
 		
 	}
     @Override
