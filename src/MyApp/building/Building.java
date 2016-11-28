@@ -52,6 +52,10 @@ public class Building {
      */
     private LinkedList<Panel> panels = new LinkedList<>();
     /**
+     *
+     */
+    private Hashtable<Floor, Kiosk> kiosks = new Hashtable<>();
+    /**
      * Accessors for different properties in this building configuration.
      */
     private Properties cfgProps = null;
@@ -204,14 +208,18 @@ public class Building {
 
         // Create Kiosks k0 = floor 1 kiosk, k1 = floor 2 kiosk ......
         int kc = new Integer(this.getProperty("Kiosks"));
+        ArrayList<Floor> floors = new ArrayList<>(getFloorPositions().values());
         for (int i = 0; i < kc; i++) {
-            Kiosk kiosk = new Kiosk("k" + i, this);
+            Floor floor = floors.get(i);
+            Kiosk kiosk = new Kiosk("k" + i, this, floor);
             kiosk.start();
+            kiosks.put(floor, kiosk);
             this.appThreads.put(kiosk.getID(), kiosk);
         }
 
         // Create elevator e0 = elevator 1, e1 = elevator 2 ......
         int e = new Integer(this.getProperty("Elevators"));
+        getLogger().log(Level.INFO, "Elevators = " + e);
         for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
             elevator.start();
@@ -233,6 +241,9 @@ public class Building {
         KioskPanel kioskPanel = new KioskPanel(this);
         this.panels.add(kioskPanel);
         kioskPanel.showInfo();
+
+        getLogger().log(Level.INFO, "Threads (" + appThreads.size() + "): " + String.join(", ",
+                appThreads.values().stream().map(AppThread::getID).sorted().collect(Collectors.toList())));
     }
 
     /**
@@ -287,6 +298,15 @@ public class Building {
     @SuppressWarnings({"unchecked", "WeakerAccess"})
     public <T extends AppThread> List<T> getThreads(Class<T> type) {
         return appThreads.values().stream().filter((t) -> t.getClass() == type).map(t -> (T) t).collect(Collectors.toList());
+    }
+
+    /**
+     * Get a kiosk that is from that floor, by a floor object.
+     * @param floor The <code>Floor</code> to get a kiosk.
+     * @return The <code>Kiosk</code> object, or <code>null</code> if not found.
+     */
+    public Kiosk getKioskByFloor(Floor floor) {
+        return this.kiosks.get(floor);
     }
 
     /**

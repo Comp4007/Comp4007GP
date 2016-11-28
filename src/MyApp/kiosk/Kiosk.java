@@ -5,17 +5,19 @@ import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
 import java.util.HashMap;
+import java.util.logging.Level;
 
 import MyApp.building.Building;
+import com.sun.media.jfxmedia.logging.Logger;
 
 
 public class Kiosk extends AppThread {
 	public static int kioskCount = 0;
 	private Floor floor;
 	
-    public Kiosk(String id, Building building) {
+    public Kiosk(String id, Building building, Floor floor) {
     	super(id, building);
-    	this.floor = (Floor) building.getFloorPositions().values().toArray()[kioskCount];
+    	this.floor = floor;
     	kioskCount++;
     	
     }
@@ -24,9 +26,9 @@ public class Kiosk extends AppThread {
         return floor;
     }
 
-    public void setFloor(Floor floor) {
-        this.floor = floor;
-    }
+//    public void setFloor(Floor floor) {
+//        this.floor = floor;
+//    }
 
     public boolean addRequest(String target){
     	// String elevatorID = building.getResult(target, id);
@@ -45,11 +47,14 @@ public class Kiosk extends AppThread {
     }
 
     protected boolean readKeypad(String destFloor){
+        building.getLogger().log(Level.INFO, String.format("read keypad, dest = %s", destFloor));
     	return addRequest(destFloor);//dummy
     }
     
     protected boolean readRFID(int id){
+        // TODO: rfid id to floor?
         String destFloor = "";
+        building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %d, dest = %s", id, destFloor));
     	return addRequest(destFloor);//dummy
     }
     

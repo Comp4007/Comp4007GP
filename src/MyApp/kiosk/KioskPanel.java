@@ -13,6 +13,7 @@ import java.awt.GridBagConstraints;
 import javax.swing.JComboBox;
 import java.awt.Insets;
 
+import MyApp.building.Floor;
 import MyApp.panel.Panel;
 
 import javax.swing.JButton;
@@ -20,6 +21,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.awt.event.ActionEvent;
+import java.util.logging.Level;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -85,7 +87,7 @@ public class KioskPanel implements Panel{
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 		
-		System.out.println(Arrays.toString(floorList));
+//		System.out.println(Arrays.toString(floorList));
 		//floor combobox
 		JComboBox FloorCbx = new JComboBox(floorList);
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
@@ -287,23 +289,27 @@ public class KioskPanel implements Panel{
 				} );
 		panel.add(btnDelete, gbc_btnDelete);
 
-		JButton btnSummit = new JButton("Summit");
-		GridBagConstraints gbc_btnSummit = new GridBagConstraints();
-		gbc_btnSummit.fill = GridBagConstraints.BOTH;
-		gbc_btnSummit.insets = new Insets(0, 0, 0, 5);
-		gbc_btnSummit.gridx = 2;
-		gbc_btnSummit.gridy = 6;
-		btnDelete.addActionListener(new ActionListener() { 
-			  public void actionPerformed(ActionEvent e) { 
-				  summitFloor();
+		JButton btnSubmit = new JButton("Submit");
+		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
+		gbc_btnSubmit.fill = GridBagConstraints.BOTH;
+		gbc_btnSubmit.insets = new Insets(0, 0, 0, 5);
+		gbc_btnSubmit.gridx = 2;
+		gbc_btnSubmit.gridy = 6;
+        btnSubmit.addActionListener(new ActionListener() {
+			  public void actionPerformed(ActionEvent e) {
+                  String floorAliasKioskUsing = (String) FloorCbx.getSelectedItem();
+                  Floor floor = building.getFloorPosition(floorAliasKioskUsing);
+                  String dest = keypadDispaly.getText();
+                  submitFloor(floor, dest);
 			  }
 
-			private void summitFloor() {
-				// TODO Auto-generated method stub
-				((Kiosk) building.getThread("e1")).readKeypad(FloorCbx.getSelectedItem().toString());
+			private void submitFloor(Floor floor, String dest) {
+                building.getLogger().log(Level.INFO, "clicked submitFloor");
+                Kiosk kiosk = building.getKioskByFloor(floor);
+                kiosk.readKeypad(dest);
 			}
 		} );
-		panel.add(btnSummit, gbc_btnSummit);
+		panel.add(btnSubmit, gbc_btnSubmit);
 		//=================================================================
 		
 		//RFID reader

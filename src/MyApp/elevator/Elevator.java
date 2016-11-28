@@ -188,13 +188,12 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     		missionQueue.remove(0);
     		//Flip the direction (true is upward and false is downward)
     		if(missionQueue.size()==0){
-    			direction ^= direction;
+    			direction = !direction;
     		}
     		//This is the time of open door
     		Thread.sleep(5000);
     	}
-    	log.info(height+", "+velocity+", "+acceleration);
-    	return;
+    	log.info(String.format("elevator %d: height = %.2f m, %.2f m/s, %.2f m/s/s", this.getElevatorId(), height, velocity, acceleration));
     }
 
     public void run() {
