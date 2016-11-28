@@ -22,10 +22,15 @@ public class ControlPanel implements Panel {
     private JFrame frmControlPanel;
 
     private JPanel panelWrapper;
+    @SuppressWarnings("FieldCanBeLocal")
     private JPanel panelElevatorsInfo;
+    @SuppressWarnings("FieldCanBeLocal")
     private JPanel panelKiosksQueuesWrapper;
+    @SuppressWarnings("FieldCanBeLocal")
     private JLabel lblElevatorStatus;
+    @SuppressWarnings("FieldCanBeLocal")
     private JLabel lblElevatorQueue;
+    @SuppressWarnings("FieldCanBeLocal")
     private JLabel lblKioskQueues;
     private JPanel panelKiosksQueues;
     private JPanel panelElevatorQueue;
