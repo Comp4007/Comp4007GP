@@ -23,7 +23,6 @@ import MyApp.panel.AdminPanel;
 import MyApp.panel.ControlPanel;
 import MyApp.panel.Panel;
 import MyApp.timer.Timer;
-import javafx.scene.layout.Pane;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -40,6 +39,19 @@ public class Building {
      */
     private static final String cfgFName = "etc/MyApp.cfg";
     /**
+     * Indicates the total meters that an Elevator may move vertically for.
+     */
+    private final int totalDisplacementMeters;
+    /**
+     * An atomic reference of startElevatorStatusCacheThread dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is. <br/>
+     * See http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
+     */
+    private final AtomicReference<LinkedHashMap<String, Floor>> arefFloorPositions;
+    /**
+     * Stores all the statuses of all the Elevators inside this Building, as a cache.
+     */
+    private final ConcurrentHashMap<Elevator, ElevatorStatus> elevatorsStatuses;
+    /**
      * Logging module for verbose, debugging and warning/error messages.
      */
     private Logger log = null;
@@ -50,32 +62,19 @@ public class Building {
     /**
      * Storage for all panels instances.
      */
-    private LinkedList<Panel> panels = new LinkedList<>();
+    private LinkedList<Panel> subWnds = new LinkedList<>();
     /**
      *
      */
     private Hashtable<Floor, Kiosk> kiosks = new Hashtable<>();
-    /**
-     * Accessors for different properties in this building configuration.
-     */
-    private Properties cfgProps = null;
-    /**
-     * Indicates the total meters that an Elevator may move vertically for.
-     */
-    private final int totalDisplacementMeters;
-    /**
-     * An atomic reference of startElevatorStatusCacheThread dictionary storing all stoppale hops (floors) and the position, in meters, of displacement where the hop is. <br/>
-     * See http://stackoverflow.com/questions/21616234/concurrent-read-only-hashmap
-     */
-    private final AtomicReference<LinkedHashMap<String, Floor>> arefFloorPositions;
     // http://cookieandcoketw.blogspot.hk/2013/03/java-hashmap-hashtable.html
     // http://www.infoq.com/cn/articles/ConcurrentHashMap
     //JavaDoc for the kioskHoppingRequests
 //    private final ConcurrentHashMap<String, Floor> kioskHoppingRequests;
     /**
-     * Stores all the statuses of all the Elevators inside this Building, as a cache.
+     * Accessors for different properties in this building configuration.
      */
-    private final ConcurrentHashMap<Elevator, ElevatorStatus> elevatorsStatuses;
+    private Properties cfgProps = null;
     /**
      * Holds the single-thread pool of reference of the thread that refreshes the cache of statuses of all elevators.<br/>
      * Note that using FixedThreadPool to reduce resource and time overheads for the cache refresher to run.
@@ -86,35 +85,6 @@ public class Building {
      * @see java.util.concurrent.ExecutorService
      */
     private Executor executorBuildingRefreshElevatorStatusCache = Executors.newFixedThreadPool(1);
-
-    /**
-     * Java.exe entry point for loading up the Building simulation element.
-     */
-    public static void main(String args[]) {
-        Panel window = new AdminPanel();
-        Building building;
-        try {
-            building = new Building();
-        } catch (Exception e) {
-            System.out.println("Cannot instantiate Building object:");
-            e.printStackTrace();
-            return;
-        }
-
-
-        java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("caught an application exit signal.");
-                building.appThreads.values().forEach(AppThread::interrupt);
-                building.panels.forEach(Panel::dismissInfo);
-                window.dismissInfo();
-            }
-        });
-
-        window.showInfo();
-        building.startApp();
-    }
 
     /**
      * Initialisation of the Building simulation element. <br/>
@@ -199,6 +169,35 @@ public class Building {
     }
 
     /**
+     * Java.exe entry point for loading up the Building simulation element.
+     */
+    public static void main(String args[]) {
+        Panel window = new AdminPanel();
+        Building building;
+        try {
+            building = new Building();
+        } catch (Exception e) {
+            System.out.println("Cannot instantiate Building object:");
+            e.printStackTrace();
+            return;
+        }
+
+
+        java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+                System.out.println("caught an application exit signal.");
+                building.appThreads.values().forEach(AppThread::interrupt);
+                building.subWnds.forEach(Panel::dismissInfo);
+                window.dismissInfo();
+            }
+        });
+
+        window.showInfo();
+        building.startApp();
+    }
+
+    /**
      * Start running up the world of the simulation.
      */
     @SuppressWarnings("WeakerAccess")
@@ -234,12 +233,12 @@ public class Building {
 
         // Wait all the thread object created. Then open control panel GUI
         ControlPanel controlPanel = new ControlPanel(this);
-        this.panels.add(controlPanel);
+        this.subWnds.add(controlPanel);
         controlPanel.showInfo();
 
         // show kiosk panel for testing
         KioskPanel kioskPanel = new KioskPanel(this);
-        this.panels.add(kioskPanel);
+        this.subWnds.add(kioskPanel);
         kioskPanel.showInfo();
 
         getLogger().info(
@@ -257,7 +256,7 @@ public class Building {
     private void startElevatorStatusCacheThread() {
         try {
             executorBuildingRefreshElevatorStatusCache.execute(() -> {
-                List<Elevator> elevators = this.getThreads(Elevator.class);
+                Collection<Elevator> elevators = this.getThreads(Elevator.class);
                 elevators.forEach(e -> this.elevatorsStatuses.put(e, e.getStatus()));
             });
         } catch (RejectedExecutionException ignored) {
@@ -301,7 +300,7 @@ public class Building {
      * @return A list of the threads that matches the type extending.
      */
     @SuppressWarnings({"unchecked", "WeakerAccess"})
-    public <T extends AppThread> List<T> getThreads(Class<T> type) {
+    public <T extends AppThread> Collection<T> getThreads(Class<T> type) {
         return appThreads.values().stream().filter((t) -> t.getClass() == type).map(t -> (T) t).collect(Collectors.toList());
     }
 
@@ -315,6 +314,10 @@ public class Building {
         return this.kiosks.get(floor);
     }
 
+    public Collection<Kiosk> getKiosks() {
+        return this.kiosks.values();
+    }
+
     /**
      * Get config file key value pair
      *
@@ -323,6 +326,10 @@ public class Building {
      */
     public String getProperty(String property) {
         return cfgProps.getProperty(property);
+    }
+
+    public Collection<Elevator> getElevators() {
+        return this.getThreads(Elevator.class);
     }
 
     /**
@@ -365,21 +372,11 @@ public class Building {
     // TODO: remove if wasting space
 
     /**
-     * [DEPRECATED]
      * Get all statuses of different elevators accordingly.
      *
      * @return An array list of elevator statuses.
      */
-    @Deprecated
     public Collection<ElevatorStatus> getElevatorStatus() {
-        /*
-        ArrayList<ElevatorStatus> es = null;
-        for (int i = 0; i < Elevator.elevatorCount; i++) {
-            es.add(((Elevator) (this.getThread("e" + i))).getStatus());
-        }
-
-        return es;
-        */
         return this.elevatorsStatuses.values();
     }
 
