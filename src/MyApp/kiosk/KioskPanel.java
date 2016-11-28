@@ -30,6 +30,8 @@ public class KioskPanel implements Panel{
 	private JTextField infoDisplay;
 	private Building building;
 	private String[] floorList;
+	private final String dbFName = "etc/RFID_DB";
+	private String[] RFIDlist;
 
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
@@ -295,6 +297,7 @@ public class KioskPanel implements Panel{
 		
 		//RFID reader
 		JComboBox RFIDCbx = new JComboBox();
+		RFIDCbx.setEditable(true);
 		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
 		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
 		gbc_RFIDCbx.fill = GridBagConstraints.HORIZONTAL;
