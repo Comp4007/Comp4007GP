@@ -219,7 +219,7 @@ public class Building {
 
         // Create elevator e0 = elevator 1, e1 = elevator 2 ......
         int e = new Integer(this.getProperty("Elevators"));
-        getLogger().log(Level.INFO, "Elevators = " + e);
+        getLogger().info(String.format("Elevators = %d", e));
         for (int i = 0; i < e; i++) {
             Elevator elevator = new Elevator("e" + i, this);
             elevator.start();
@@ -242,8 +242,13 @@ public class Building {
         this.panels.add(kioskPanel);
         kioskPanel.showInfo();
 
-        getLogger().log(Level.INFO, "Threads (" + appThreads.size() + "): " + String.join(", ",
-                appThreads.values().stream().map(AppThread::getID).sorted().collect(Collectors.toList())));
+        getLogger().info(
+                String.format("Threads (%d): %s",
+                        appThreads.size(),
+                        String.join(", ", appThreads.values().stream().map(AppThread::getID).sorted().collect(Collectors.toList())
+                        )
+                )
+        );
     }
 
     /**
@@ -280,7 +285,7 @@ public class Building {
      * Getting the specify thread. Also get the thread's attribute. <br/>
      * E.g.:
      * <code>Eleavtor ((Elevator)(this.getThread("e" + 1))).getStatus()</code>
-     * â†’ get the e1(Elevator 2) status
+     * þýþýget the e1(Elevator 2) status
      *
      * @param id The element identifier for the simulation object.
      */
@@ -302,6 +307,7 @@ public class Building {
 
     /**
      * Get a kiosk that is from that floor, by a floor object.
+     *
      * @param floor The <code>Floor</code> to get a kiosk.
      * @return The <code>Kiosk</code> object, or <code>null</code> if not found.
      */
@@ -456,7 +462,8 @@ public class Building {
             */
 
             // push back to the lift to update its next destination.
-            if (es.getElevator().putNewDestination(dest)) {
+            if (es.getElevator().putNewDestination(src)) {
+                es.getElevator().putNewDestination(dest);
                 // return an Elevator that such src:dest pair assigned to
                 return es.getElevator();
             }
