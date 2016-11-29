@@ -14,7 +14,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -104,10 +109,10 @@ public class AdminPanel implements Panel{
         JButton btnUpdate = new JButton("Update");     
         
         // Layout 
-        textId.setBounds(516, 44, 100, 25);
-        textFname.setBounds(516, 102, 100, 25);
-        textLname.setBounds(516, 160, 100, 25);
-        textAge.setBounds(516, 234, 100, 25);
+        textId.setBounds(449, 44, 167, 25);
+        textFname.setBounds(449, 102, 167, 25);
+        textLname.setBounds(449, 160, 167, 25);
+        textAge.setBounds(449, 217, 167, 25);
         
         btnAdd.setBounds(349, 381, 100, 25);
         btnUpdate.setBounds(449, 381, 100, 25);
@@ -146,7 +151,7 @@ public class AdminPanel implements Panel{
         frame.getContentPane().add(lblNewLabel_1);
         
         JLabel lblNewLabel_2 = new JLabel("LName:");
-        lblNewLabel_2.setBounds(383, 239, 61, 16);
+        lblNewLabel_2.setBounds(383, 222, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
         // create an array of objects to set the row data
@@ -181,6 +186,18 @@ public class AdminPanel implements Panel{
                 
                 // add row to the model
                 model.addRow(row);
+                
+                //Append the data in the RFID_DB
+                try(FileWriter fw = new FileWriter("etc/RFID_DB", true);
+                	    BufferedWriter bw = new BufferedWriter(fw);
+                	    PrintWriter out = new PrintWriter(bw))
+                	{ 
+                	    out.println(row[0]+","+row[1]+","+row[2]+","+row[3]);
+                	    bw.close();
+                	    out.close();
+                	} catch (IOException ex) {
+                	    System.out.println("Data cannot insert to the databse.");
+                	}
             }
         });
         
@@ -221,12 +238,36 @@ public class AdminPanel implements Panel{
                 else{
                     System.out.println("Delete Error");
                 }
+                
+                //Delete data in the RFID_DB 
+                File inputFile = new File("etc/RFID_DB");
+                File tempFile = new File("myTempFile.txt");
+
+                try{
+                BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
+
+                String lineToRemove = textId.getText();
+                String currentLine;
+
+                while((currentLine = reader.readLine()) != null) {
+                    // trim newline when comparing with lineToRemove
+                    String trimmedLine = currentLine.trim();
+                    if(trimmedLine.equals(lineToRemove)) continue;
+                    writer.write(currentLine + System.getProperty("line.separator"));
+                }
+                writer.close(); 
+                reader.close(); 
+                boolean successful = tempFile.renameTo(inputFile);
+                }catch (Exception ex){
+                	System.out.println("Data cannot delete from the database");
+                }
             }
         });
         
         //jframe property
         frame.setTitle("RFID Admin Panel");
-        frame.setSize(667,448);
+        frame.setSize(667,434);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
