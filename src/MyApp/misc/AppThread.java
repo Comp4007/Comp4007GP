@@ -24,6 +24,7 @@ public abstract class AppThread extends Thread {
     //------------------------------------------------------------
     // AppThread
     public AppThread(String id, Building building) {
+        super(id);
 		this.id = id;
 		this.building = building;
 		log = building.getLogger();
