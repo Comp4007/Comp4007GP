@@ -216,6 +216,37 @@ public class AdminPanel implements Panel{
                    model.setValueAt(textFname.getText(), i, 1);
                    model.setValueAt(textLname.getText(), i, 2);
                    model.setValueAt(textAge.getText(), i, 3);
+                   try{
+                	   File originalFile = new File("etc/RFID_DB");
+                	   BufferedReader br = new BufferedReader(new FileReader(originalFile));
+                	   // Construct the new file that will later be renamed to the original
+                	   // filename.
+                	   File tempFile = new File("etc/myTempFile");
+                	   PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+
+                	   String line = null;
+                	   // Read from the original file and write to the new
+                	   // unless content matches data to be removed.
+                	   while ((line = br.readLine()) != null) {
+                		   if (line.contains(textId.getText())) {
+                			   line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
+                		   }
+                		   pw.println(line);
+                		   pw.flush();
+                	   }
+                	   pw.close();
+                	   br.close();
+                	   // Delete the original file
+                	   if (!originalFile.delete()) {
+                		   System.out.println("Could not delete file");
+                		   return;
+                	   }
+                	   // Rename the new file to the filename the original file had.
+                	   if (!tempFile.renameTo(originalFile))
+                		   System.out.println("Could not rename file");
+                   		}catch (Exception ex){
+                   		   System.out.println("Update error");
+                   		}   
                 }
                 else{
                     System.out.println("Update Error");
