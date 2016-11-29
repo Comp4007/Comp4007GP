@@ -234,34 +234,31 @@ public class AdminPanel implements Panel{
                 if(i >= 0){
                     // remove a row from jtable
                     model.removeRow(i);
-                }
-                else{
+                    //Delete data in the RFID_DB 
+                    File inputFile = new File("etc/RFID_DB");
+                    File tempFile = new File("etc/myTempFile");
+
+                    try{
+                    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+                    BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));	
+                    String lineToRemove = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
+                    String currentLine;
+
+                    while((currentLine = reader.readLine()) != null) {
+                        // trim newline when comparing with lineToRemove
+                        String trimmedLine = currentLine.trim();
+                        if(trimmedLine.equals(lineToRemove)) continue;
+                        writer.write(currentLine + System.getProperty("line.separator"));
+                    }
+                    writer.close(); 
+                    reader.close(); 
+                    boolean successful = tempFile.renameTo(inputFile);
+                    }catch (Exception ex){
+                    	System.out.println("Delete Error");
+                    }
+                }else{
                     System.out.println("Delete Error");
-                }
-                
-                //Delete data in the RFID_DB 
-                File inputFile = new File("etc/RFID_DB");
-                File tempFile = new File("myTempFile.txt");
-
-                try{
-                BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-                BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
-
-                String lineToRemove = textId.getText();
-                String currentLine;
-
-                while((currentLine = reader.readLine()) != null) {
-                    // trim newline when comparing with lineToRemove
-                    String trimmedLine = currentLine.trim();
-                    if(trimmedLine.equals(lineToRemove)) continue;
-                    writer.write(currentLine + System.getProperty("line.separator"));
-                }
-                writer.close(); 
-                reader.close(); 
-                boolean successful = tempFile.renameTo(inputFile);
-                }catch (Exception ex){
-                	System.out.println("Data cannot delete from the database");
-                }
+                }            
             }
         });
         
