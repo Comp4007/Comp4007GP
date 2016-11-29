@@ -12,13 +12,14 @@ import MyApp.building.Building;
 
 public class Kiosk extends AppThread {
     public static int kioskCount = 0;
+    private int kioskid;
     private KioskPanel kp;
     private Floor floor;
 
     public Kiosk(String id, Building building, Floor floor) {
         super(id, building);
         this.floor = floor;
-        kioskCount++;
+        kioskid = kioskCount++;
         kp = new KioskPanel(building);
     }
 
@@ -50,7 +51,6 @@ public class Kiosk extends AppThread {
     }
 
     protected String readKeypad(String destFloor) {
-        System.out.println(this.id + "/" + destFloor);
         return addRequest(destFloor);//dummy
     }
 
@@ -64,6 +64,7 @@ public class Kiosk extends AppThread {
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
         //TODO search if any elevator is arrived
+        kp.updateDisplay("texting",kioskid);
         finishRequest("");
     }
 
@@ -74,6 +75,7 @@ public class Kiosk extends AppThread {
     //TODO:  finishRequest
     private void finishRequest(String elevatorID) {
         //delete all element in queue with this elevatorID
+    	
     }
 
     public void run() {

@@ -24,6 +24,8 @@ import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
 import java.awt.Color;
 
 public class KioskPanel implements Panel{
@@ -32,9 +34,10 @@ public class KioskPanel implements Panel{
 	private Building building;
 	private String[] floorList;
 	private final String dbFName = "etc/RFID_DB";
-	private String displayText = "";
+	private String[] displayText;
 	private String[] RFIDlist;
-
+	private Kiosk kiosk;
+	private int kioskNum;
 	@Override
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
@@ -63,6 +66,9 @@ public class KioskPanel implements Panel{
 	public KioskPanel(Building building) {
 		this.building = building;
 		floorList = building.getFloorNames();
+		displayText = new String[floorList.length];
+		kiosk = (Kiosk) building.getThread("k0");
+		kioskNum = 0;
 		initialize();
 	}
 
@@ -91,8 +97,7 @@ public class KioskPanel implements Panel{
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
-		
-//		System.out.println(Arrays.toString(floorList));
+	
 		//floor combobox
 		JComboBox FloorCbx = new JComboBox(floorList);
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
@@ -102,7 +107,8 @@ public class KioskPanel implements Panel{
 		gbc_FloorCbx.gridy = 0;
 		FloorCbx.addActionListener (new ActionListener () {
 		    public void actionPerformed(ActionEvent e) {
-		        
+		    	kioskNum = Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString());
+		    	kiosk = (Kiosk) building.getThread("k" + kioskNum);
 		    }
 		});
 		panel.add(FloorCbx, gbc_FloorCbx);
@@ -110,7 +116,7 @@ public class KioskPanel implements Panel{
 		//Text field for display keypad result
 		display = new JTextField();
 		System.out.println(displayText);
-		display.setText(displayText);
+		display.setText(displayText[kioskNum]);
 		display.setBackground(Color.WHITE);
 		display.setHorizontalAlignment(SwingConstants.CENTER);
 		display.setEditable(false);
@@ -122,6 +128,15 @@ public class KioskPanel implements Panel{
 		gbc_display.gridy = 1;
 		panel.add(display, gbc_display);
 		display.setColumns(1);
+		ActionListener actionListener = new ActionListener() {
+	        public void actionPerformed(ActionEvent actionEvent) {
+	        	System.out.println(displayText[kioskNum]);
+	        	display.setText(displayText[kioskNum]);
+	        }
+	    };
+	    Timer timer = new Timer(1000, actionListener);
+	    timer.start();
+		
 		
 		JLabel lblKeypad = new JLabel("Keypad");
 		GridBagConstraints gbc_lblKeypad = new GridBagConstraints();
@@ -169,12 +184,11 @@ public class KioskPanel implements Panel{
 		btnSummit.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
 				  if(Arrays.asList(floorList).contains(Keypadbox.getSelectedItem().toString())){
-				      building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk clicked submitFloor");
-					  displayText = ((Kiosk) building.getThread("k" + Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString()) ) ).readKeypad(Keypadbox.getSelectedItem().toString() );
-					display.setText(displayText);
+				      building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk clicked submitFloor.");
+					  displayText[kioskNum] = kiosk.readKeypad(Keypadbox.getSelectedItem().toString() );
 				  }else{
-					  displayText = "Wrong Floor Input, please try again.";
-					  display.setText(displayText);
+					  displayText[kioskNum] = "Wrong Floor Input, please try again.";
+					  display.setText(displayText[kioskNum]);
 				  }
 			  }
 		} );
@@ -190,8 +204,6 @@ public class KioskPanel implements Panel{
 		btnRfidSummit.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
 				  	Random ran = new Random();    
-				  	displayText = String.valueOf(ran.nextInt());
-				  	display.setText(displayText);
 			  }
 		} );
 		
@@ -204,20 +216,13 @@ public class KioskPanel implements Panel{
 		gbc_btnEE.gridy = 6;
 		btnEE.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  ((Kiosk) building.getThread("k" + Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString()) ) ).elevatorIn();
+				  kiosk.elevatorIn();
 			  }
 		} );
 		panel.add(btnEE, gbc_btnEE);
 	}
 	
-	protected void updateDisplay(String text){
-		displayText = text;
-		display.setText(displayText);
-		display.validate();
+	protected void updateDisplay(String text,int id){
+		displayText[id] = text;
 	}
-	
-    public void run() {
-		display.setText(displayText);
-		display.validate();
-    }
 }
