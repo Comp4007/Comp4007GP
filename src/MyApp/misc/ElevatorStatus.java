@@ -9,15 +9,17 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
 	private double breakDistance;
 	private double acceleration;
 	private int queueCount;
+	private int servingDirection;
 	
-	public ElevatorStatus(Elevator elevator, double height, double velocity, double breakDistance, double acceleration, int queueCount) {
+	public ElevatorStatus(Elevator elevator, double height, double velocity, double breakDistance, double acceleration, int queueCount, int servingDirection) {
 		this.elevator = elevator;
 		this.height = height;
 		this.velocity = velocity;
 		this.breakDistance = breakDistance;
 		this.acceleration = acceleration;
 		this.queueCount = queueCount;
-	}
+        this.servingDirection = servingDirection;
+    }
 
 	public Elevator getElevator() {
 		return elevator;
@@ -61,4 +63,8 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
 	public int compareTo(ElevatorStatus o) {
 		return this.getElevator().compareTo(o.getElevator());
 	}
+
+    public int getServingDirection() {
+        return servingDirection;
+    }
 }
