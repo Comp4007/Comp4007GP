@@ -28,12 +28,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
+
+import MyApp.kiosk.RFID;
+
 import javax.swing.JLabel;
 
 public class AdminPanel implements Panel{
 	private JFrame frame;
 	private JTable table;
 	private final String dbFName = "etc/RFID_DB";
+	private final RFID rf = new RFID();
 
 	public AdminPanel(){
 		initialize();
@@ -186,18 +190,8 @@ public class AdminPanel implements Panel{
                 
                 // add row to the model
                 model.addRow(row);
-                
-                //Append the data in the RFID_DB
-                try(FileWriter fw = new FileWriter("etc/RFID_DB", true);
-                	    BufferedWriter bw = new BufferedWriter(fw);
-                	    PrintWriter out = new PrintWriter(bw))
-                	{ 
-                	    out.println(row[0]+","+row[1]+","+row[2]+","+row[3]);
-                	    bw.close();
-                	    out.close();
-                	} catch (IOException ex) {
-                	    System.out.println("Data cannot insert to the databse.");
-                	}
+                String line = row[0]+","+row[1]+","+row[2]+","+row[3];
+                rf.insertData(line);
             }
         });
         
@@ -209,44 +203,15 @@ public class AdminPanel implements Panel{
              
                 // i = the index of the selected row
                 int i = table.getSelectedRow();
-                
+                String line = "";
                 if(i >= 0) 
                 {
                    model.setValueAt(textId.getText(), i, 0);
                    model.setValueAt(textFname.getText(), i, 1);
                    model.setValueAt(textLname.getText(), i, 2);
                    model.setValueAt(textAge.getText(), i, 3);
-                   try{
-                	   File originalFile = new File("etc/RFID_DB");
-                	   BufferedReader br = new BufferedReader(new FileReader(originalFile));
-                	   // Construct the new file that will later be renamed to the original
-                	   // filename.
-                	   File tempFile = new File("etc/myTempFile");
-                	   PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
-
-                	   String line = null;
-                	   // Read from the original file and write to the new
-                	   // unless content matches data to be removed.
-                	   while ((line = br.readLine()) != null) {
-                		   if (line.contains(textId.getText())) {
-                			   line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
-                		   }
-                		   pw.println(line);
-                		   pw.flush();
-                	   }
-                	   pw.close();
-                	   br.close();
-                	   // Delete the original file
-                	   if (!originalFile.delete()) {
-                		   System.out.println("Could not delete file");
-                		   return;
-                	   }
-                	   // Rename the new file to the filename the original file had.
-                	   if (!tempFile.renameTo(originalFile))
-                		   System.out.println("Could not rename file");
-                   		}catch (Exception ex){
-                   		   System.out.println("Update error");
-                   		}   
+                   line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
+                   rf.updateData(textId.getText(), line);  
                 }
                 else{
                     System.out.println("Update Error");
@@ -262,31 +227,12 @@ public class AdminPanel implements Panel{
             
                 // i = the index of the selected row
                 int i = table.getSelectedRow();
+                String line = "";
                 if(i >= 0){
                     // remove a row from jtable
                     model.removeRow(i);
-                    //Delete data in the RFID_DB 
-                    File inputFile = new File("etc/RFID_DB");
-                    File tempFile = new File("etc/myTempFile");
-
-                    try{
-                    BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));	
-                    String lineToRemove = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
-                    String currentLine;
-
-                    while((currentLine = reader.readLine()) != null) {
-                        // trim newline when comparing with lineToRemove
-                        String trimmedLine = currentLine.trim();
-                        if(trimmedLine.equals(lineToRemove)) continue;
-                        writer.write(currentLine + System.getProperty("line.separator"));
-                    }
-                    writer.close(); 
-                    reader.close(); 
-                    boolean successful = tempFile.renameTo(inputFile);
-                    }catch (Exception ex){
-                    	System.out.println("Delete Error");
-                    }
+                    line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
+                    rf.deleteData(line);
                 }else{
                     System.out.println("Delete Error");
                 }            
