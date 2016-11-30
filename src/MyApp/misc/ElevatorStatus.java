@@ -40,7 +40,7 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
 		return this.velocity;
 	}
 
-	public int getDirection() {
+	public int getActualDirection() {
         if (getVelocity() > 0) {
             return 1;
         } else if (getVelocity() < 0) {

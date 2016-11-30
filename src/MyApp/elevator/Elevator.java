@@ -108,7 +108,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
                 speed,
                 //Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
                 // v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
-                accelerationRate == 0 ? 0 : Math.abs(Math.pow((speed / 60), 2) / accelerationRate / 2),
+                Math.abs(speed * -speed / -maxAccelerationRate / 2),
                 accelerationRate,
                 missionQueueUpward.size() + missionQueueDownward.size(),
                 servingDirection);
@@ -161,21 +161,23 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * Perform physic simulations of the {@code Elevator} by changing its physic parameters during passing {@code elapseMillSec} ms of time.
      * @throws InterruptedException
      */
-    private void simulate() throws InterruptedException {
-        // Zero-st, we would like to know how many milliseconds passed during this and last simulate() call.
-        long elapseMillSec = System.nanoTime() - lastCallSimulate;
+    private void simulate(long elapseMillSec) throws InterruptedException {
 
         // set this elevator may serve any direction if both jobs are done
-        if (missionQueueUpward.size() == 0 && missionQueueDownward.size() == 0){
+        // switch direction if same direction has no jobs to work on
+        if (servingDirection == 0) {
+            if (missionQueueUpward.size() > 0) {
+                servingDirection = 1;
+            } if (missionQueueDownward.size() > 0) {
+                servingDirection = -1;
+            }
+            return;
+        } else if (missionQueueUpward.size() == 0 && missionQueueDownward.size() == 0){
             servingDirection = 0;
             return;
-        }
-        else
-            servingDirection = 1; // or just dummy select direction
-
-        // switch direction if same direction has no jobs to work on
-        if ((servingDirection > 0 && missionQueueUpward.size() == 0) || (servingDirection < 0 && missionQueueDownward.size() == 0))
+        } else if ((servingDirection > 0 && missionQueueUpward.size() == 0) || (servingDirection < 0 && missionQueueDownward.size() == 0)) {
             servingDirection = -servingDirection;
+        }
 
         // select which queue to use, upward or downward
         ArrayList<Floor> missionQueue;
@@ -190,6 +192,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 
         // upward and downward use the same formula. generalised.
         if (targetYPos != this.yPosition) {
+            // holding the speed or accelerate
             if (Math.abs(speed) >= maxSpeed) {
                 speed = servingDirection * maxSpeed;
                 accelerationRate = 0;
@@ -198,7 +201,8 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
             }
 
             // brake?
-            if (servingDirection * this.yPosition + brakeDistance >= servingDirection * targetYPos) {
+            log.info(String.format("??? %.3f >= %.3f ???", yPosition, targetYPos - brakeDistance));
+            if (servingDirection * this.yPosition >= servingDirection * targetYPos - servingDirection * brakeDistance) {
                 log.info("should brake");
                 accelerationRate = servingDirection * -maxAccelerationRate;
             }
@@ -216,7 +220,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
             }
         }
 
-        this.yPosition += speed * updateWaitDuration / 1000 + 0.5 * (accelerationRate) * Math.pow(updateWaitDuration / 1000, 2);
+        this.yPosition += speed * elapseMillSec / 1000 + 0.5 * (accelerationRate) * Math.pow(elapseMillSec / 1000, 2);
         if (speed == 0) {
             this.yPosition = targetYPos;
             queue.remove(getFloorIndex(target));
@@ -245,7 +249,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
                 break;
 
             try {
-                simulate();
+                simulate(updateWaitDuration);
             } catch (InterruptedException e) {
                 System.out.println("Elevator interrupted, terminating.");
             }
@@ -269,7 +273,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         ElevatorStatus status = getStatus();
         double yLift = status.getYPosition();
         double yFloor = floor.getYPosition();
-        int dir = status.getDirection();
+        int dir = status.getActualDirection();
         double brakeDistance = status.getBrakeDistance();
         // Get the floor height plus breaking distance to compare with the height of elevator (Use the top(y position) of elevator as the height)
         // First check the direction of elevator, if it is moving down(The height of elevator - 4m(height of floor)), y displacement + breaking distance
