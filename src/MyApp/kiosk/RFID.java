@@ -87,7 +87,7 @@ public class RFID {
      	   // unless content matches data to be removed.
      	   while ((line = br.readLine()) != null) {
      		   if (line.contains(id)) {
-     			   line = line;
+     			   line = data;
      		   }
      		   pw.println(line);
      		   pw.flush();
@@ -121,8 +121,10 @@ public class RFID {
         while((currentLine = reader.readLine()) != null) {
             // trim newline when comparing with lineToRemove
             String trimmedLine = currentLine.trim();
-            if(trimmedLine.equals(lineToRemove)) continue;
-            writer.write(currentLine + System.getProperty("line.separator"));
+            if(trimmedLine.equals(lineToRemove)) {
+            }else{
+            	writer.write(currentLine + System.getProperty("line.separator"));
+            }
         }
         writer.close(); 
         reader.close(); 
