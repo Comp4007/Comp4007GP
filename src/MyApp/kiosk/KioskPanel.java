@@ -183,14 +183,14 @@ public class KioskPanel implements Panel{
 	    Timer timer2 = new Timer(60000, rfidUpdateListener);
 	    timer2.start();
 	    
-		JButton btnSummit = new JButton("Keypad Summit");
-		GridBagConstraints gbc_btnSummit = new GridBagConstraints();
-		gbc_btnSummit.gridwidth = 2;
-		gbc_btnSummit.fill = GridBagConstraints.BOTH;
-		gbc_btnSummit.insets = new Insets(0, 0, 5, 5);
-		gbc_btnSummit.gridx = 0;
-		gbc_btnSummit.gridy = 5;
-		btnSummit.addActionListener(new ActionListener() { 
+		JButton btnSubmit = new JButton("Keypad Submit");
+		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
+		gbc_btnSubmit.gridwidth = 2;
+		gbc_btnSubmit.fill = GridBagConstraints.BOTH;
+		gbc_btnSubmit.insets = new Insets(0, 0, 5, 5);
+		gbc_btnSubmit.gridx = 0;
+		gbc_btnSubmit.gridy = 5;
+		btnSubmit.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent e) { 
 				  if(Arrays.asList(floorList).contains(Keypadbox.getSelectedItem().toString())){
 				      building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk clicked submitFloor.");
@@ -200,16 +200,16 @@ public class KioskPanel implements Panel{
 				  }
 			  }
 		} );
-		panel.add(btnSummit, gbc_btnSummit);
+		panel.add(btnSubmit, gbc_btnSubmit);
 		
-		JButton btnRfidSummit = new JButton("RFID Summit");
-		GridBagConstraints gbc_btnRfidSummit = new GridBagConstraints();
-		gbc_btnRfidSummit.insets = new Insets(0, 0, 5, 0);
-		gbc_btnRfidSummit.fill = GridBagConstraints.BOTH;
-		gbc_btnRfidSummit.gridx = 2;
-		gbc_btnRfidSummit.gridy = 5;
-		panel.add(btnRfidSummit, gbc_btnRfidSummit);
-		btnRfidSummit.addActionListener(new ActionListener() { 
+		JButton btnRfidSubmit = new JButton("RFID Submit");
+		GridBagConstraints gbc_btnRfidSubmit = new GridBagConstraints();
+		gbc_btnRfidSubmit.insets = new Insets(0, 0, 5, 0);
+		gbc_btnRfidSubmit.fill = GridBagConstraints.BOTH;
+		gbc_btnRfidSubmit.gridx = 2;
+		gbc_btnRfidSubmit.gridy = 5;
+		panel.add(btnRfidSubmit, gbc_btnRfidSubmit);
+		btnRfidSubmit.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent e) { 
 				  building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk pass RFID id " + RFIDCbx.getSelectedItem().toString());
 				  displayText[kioskNum] = kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
