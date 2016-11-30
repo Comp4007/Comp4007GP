@@ -18,7 +18,7 @@ public final class Floor implements Serializable, Comparable<Floor> {
         return name;
     }
 
-    public double getYDisplacement() {
+    public double getYPosition() {
         return yDisplacement;
     }
 

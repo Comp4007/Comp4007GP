@@ -13,7 +13,6 @@ import java.awt.GridBagConstraints;
 import javax.swing.JComboBox;
 import java.awt.Insets;
 
-import MyApp.building.Floor;
 import MyApp.panel.Panel;
 
 import javax.swing.DefaultComboBoxModel;

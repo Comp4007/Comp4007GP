@@ -43,8 +43,8 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
             return resultVelocity;
 
         // distance to src + brake distance
-        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getDirection() * o1.getBreakDistance()) - floor.getYDisplacement());
-        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getDirection() * o2.getBreakDistance()) - floor.getYDisplacement());
+        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getDirection() * o1.getBrakeDistance()) - floor.getYPosition());
+        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getDirection() * o2.getBrakeDistance()) - floor.getYPosition());
         int resultDistanceToSrc = (int) distanceToSrcElevator1 - (int) distanceToSrcElevator2;
         if (resultDistanceToSrc != 0)
             return resultDistanceToSrc;

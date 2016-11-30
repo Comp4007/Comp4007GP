@@ -5,14 +5,10 @@ import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.kiosk.Kiosk;
 import MyApp.misc.ElevatorStatus;
-import sun.misc.JavaLangAccess;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.nio.charset.Charset;
-import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;

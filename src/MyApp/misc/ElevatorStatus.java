@@ -2,8 +2,6 @@ package MyApp.misc;
 
 import MyApp.elevator.Elevator;
 
-import java.util.Comparator;
-
 public class ElevatorStatus implements Comparable<ElevatorStatus> {
 	private Elevator elevator;
 	private double height;
@@ -47,7 +45,7 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
         return 0;
     }
 
-	public double getBreakDistance(){
+	public double getBrakeDistance(){
 		return this.breakDistance;
 	}
 

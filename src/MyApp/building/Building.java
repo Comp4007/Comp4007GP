@@ -6,9 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 import java.util.logging.ConsoleHandler;
@@ -439,7 +436,7 @@ public class Building {
         if (src.equals(dest))
             return null; // won't assign any but shit you donk
 
-        boolean goingUp = dest.getYDisplacement() - src.getYDisplacement() > 0;
+        boolean goingUp = dest.getYPosition() - src.getYPosition() > 0;
 
         // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
         // TODO: calculate which lift to catch the request
@@ -453,8 +450,8 @@ public class Building {
             // ignoring such code, calculate if may stop within floor level by the Elevator itself.
             /*
             int direction = goingUp ? 1 : -1;
-            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBreakDistance();
-            double displacementFloor = dest.getYDisplacement();
+            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBrakeDistance();
+            double displacementFloor = dest.getYPosition();
             if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
                 continue;
             */
@@ -475,7 +472,7 @@ public class Building {
 
         for (Elevator e : getElevators()) {
             double elevYPos = e.getStatus().getYPosition();
-            double floorYPos = floor.getYDisplacement();
+            double floorYPos = floor.getYPosition();
 
             if (elevYPos < floorYPos - 0.05 || elevYPos > floorYPos + 0.05)
                 continue;

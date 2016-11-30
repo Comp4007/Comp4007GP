@@ -4,7 +4,6 @@ import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.logging.Level;
