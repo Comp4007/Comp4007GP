@@ -15,6 +15,7 @@ public class Kiosk extends AppThread {
     private int kioskid;
     private KioskPanel kp;
     private Floor floor;
+    private RFID rfid;
 
     public Kiosk(String id, Building building, Floor floor) {
         super(id, building);
@@ -51,12 +52,13 @@ public class Kiosk extends AppThread {
     }
 
     protected String readKeypad(String destFloor) {
-        return addRequest(destFloor);//dummy
+        return addRequest(destFloor);
     }
 
     protected String readRFID(int id) {
         // TODO: rfid id to floor?
         String destFloor = "";
+        
         building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %d, dest = %s", id, destFloor));
         return addRequest(destFloor);//dummy
     }

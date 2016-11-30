@@ -38,6 +38,7 @@ public class KioskPanel implements Panel{
 	private String[] RFIDlist;
 	private Kiosk kiosk;
 	private int kioskNum;
+	private RFID rfid;
 	@Override
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
@@ -67,6 +68,7 @@ public class KioskPanel implements Panel{
 		this.building = building;
 		floorList = building.getFloorNames();
 		displayText = new String[floorList.length];
+		rfid = new RFID();
 		kiosk = (Kiosk) building.getThread("k0");
 		kioskNum = 0;
 		initialize();
@@ -115,7 +117,6 @@ public class KioskPanel implements Panel{
 		
 		//Text field for display keypad result
 		display = new JTextField();
-		System.out.println(displayText);
 		display.setText(displayText[kioskNum]);
 		display.setBackground(Color.WHITE);
 		display.setHorizontalAlignment(SwingConstants.CENTER);
@@ -130,7 +131,6 @@ public class KioskPanel implements Panel{
 		display.setColumns(1);
 		ActionListener actionListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
-	        	System.out.println(displayText[kioskNum]);
 	        	display.setText(displayText[kioskNum]);
 	        }
 	    };
@@ -165,7 +165,7 @@ public class KioskPanel implements Panel{
 		//=================================================================
 		
 		//RFID reader
-		JComboBox RFIDCbx = new JComboBox();
+		JComboBox RFIDCbx = new JComboBox(rfid.getAllTheId().parallelStream().toArray(String[]::new));
 		RFIDCbx.setEditable(true);
 		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
 		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
@@ -203,7 +203,8 @@ public class KioskPanel implements Panel{
 		panel.add(btnRfidSummit, gbc_btnRfidSummit);
 		btnRfidSummit.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  	Random ran = new Random();    
+				  building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk pass RFID id.");
+				  kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
 			  }
 		} );
 		
