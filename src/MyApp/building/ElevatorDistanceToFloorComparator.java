@@ -27,11 +27,11 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
         // direction: same, still, reverse
         int resultDirection = 0;
         int requestDirection = goingUp ? 1 : -1;
-        if (o1.getDirection() == o2.getDirection()) {
+        if (o1.getServingDirection() == o2.getServingDirection()) {
             resultDirection = 0;
-        } else if (o1.getDirection() == requestDirection) {
+        } else if (o1.getServingDirection() == requestDirection) {
             resultDirection = -1;
-        } else if (o2.getDirection() == requestDirection) {
+        } else if (o2.getServingDirection() == requestDirection) {
             resultDirection = 1;
         }
         if (resultDirection != 0)
@@ -43,8 +43,8 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
             return resultVelocity;
 
         // distance to src + brake distance
-        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getDirection() * o1.getBrakeDistance()) - floor.getYPosition());
-        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getDirection() * o2.getBrakeDistance()) - floor.getYPosition());
+        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getActualDirection() * o1.getBrakeDistance()) - floor.getYPosition());
+        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getActualDirection() * o2.getBrakeDistance()) - floor.getYPosition());
         int resultDistanceToSrc = (int) distanceToSrcElevator1 - (int) distanceToSrcElevator2;
         if (resultDistanceToSrc != 0)
             return resultDistanceToSrc;

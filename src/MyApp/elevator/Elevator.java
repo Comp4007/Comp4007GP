@@ -201,7 +201,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
             }
 
             // brake?
-            log.info(String.format("??? %.3f >= %.3f ???", yPosition, targetYPos - brakeDistance));
+//            log.info(String.format("??? %.3f >= %.3f ???", yPosition, targetYPos - brakeDistance));
             if (servingDirection * this.yPosition >= servingDirection * targetYPos - servingDirection * brakeDistance) {
                 log.info("should brake");
                 accelerationRate = servingDirection * -maxAccelerationRate;

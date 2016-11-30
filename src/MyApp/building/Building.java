@@ -450,7 +450,7 @@ public class Building {
             // ignoring such code, calculate if may stop within floor level by the Elevator itself.
             /*
             int direction = goingUp ? 1 : -1;
-            double displacementElevatorStop = es.getYPosition() + es.getDirection() * es.getBrakeDistance();
+            double displacementElevatorStop = es.getYPosition() + es.getActualDirection() * es.getBrakeDistance();
             double displacementFloor = dest.getYPosition();
             if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
                 continue;
