@@ -22,6 +22,7 @@ public class Kiosk extends AppThread {
         this.floor = floor;
         kioskid = kioskCount++;
         kp = new KioskPanel(building);
+        rfid = new RFID();
     }
 
     public Floor getFloor() {
@@ -55,12 +56,17 @@ public class Kiosk extends AppThread {
         return addRequest(destFloor);
     }
 
-    protected String readRFID(int id) {
+    protected String readRFID(String id) {
         // TODO: rfid id to floor?
-        String destFloor = "";
-        
-        building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %d, dest = %s", id, destFloor));
-        return addRequest(destFloor);//dummy
+    	System.out.println(id);
+        String destFloor = rfid.getFloorById(id);
+      
+        if(destFloor != "na"){
+        	building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %s, dest = %s", id, destFloor));
+        	return addRequest(destFloor);//dummy
+        }else{
+        	return "Wrong ID, Please try again.";
+        }
     }
 
     protected void elevatorIn() {

@@ -188,7 +188,6 @@ public class KioskPanel implements Panel{
 					  displayText[kioskNum] = kiosk.readKeypad(Keypadbox.getSelectedItem().toString() );
 				  }else{
 					  displayText[kioskNum] = "Wrong Floor Input, please try again.";
-					  display.setText(displayText[kioskNum]);
 				  }
 			  }
 		} );
@@ -203,8 +202,8 @@ public class KioskPanel implements Panel{
 		panel.add(btnRfidSummit, gbc_btnRfidSummit);
 		btnRfidSummit.addActionListener(new ActionListener() { 
 			  public void actionPerformed(ActionEvent e) { 
-				  building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk pass RFID id.");
-				  kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
+				  building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk pass RFID id " + RFIDCbx.getSelectedItem().toString());
+				  displayText[kioskNum] = kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
 			  }
 		} );
 		

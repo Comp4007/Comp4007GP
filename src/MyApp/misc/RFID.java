@@ -11,21 +11,20 @@ import java.util.ArrayList;
 
 public class RFID {
 	private ArrayList<String> id = new ArrayList<String>();
-	private int floor = 0;
 	
 	public RFID(){}
 	
-	public int getFloorById(String id){
+	public String getFloorById(String id){
+		String floor = "na";
 		try{
      	   File database = new File("etc/RFID_DB");
      	   BufferedReader br = new BufferedReader(new FileReader(database));
-
      	   String line = null;
      	   // Read from the database file
      	   // unless content matches data to get the floor 
      	   while ((line = br.readLine()) != null) {
      		   if (line.contains(id)) {
-     			   floor = Integer.parseInt(line.split(",")[1]);
+     			   floor = line.split(",")[1];
      			   break;
      		   }
      	   }
@@ -33,6 +32,7 @@ public class RFID {
            }catch (Exception ex){
         		  System.out.println("File not found");
            }     
+		System.out.println(floor);
 		return floor;
 	}
 	
