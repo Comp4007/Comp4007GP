@@ -25,64 +25,68 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     /**
      * Default setting in config file. Assume the accelation is 5
      */
-    private double accelerationParameter;
+    private double maxAccelerationRate;
     /**
      * Determine the direction of elevator. E.G. -5 or +5
      */
-    private double acceleration;
+    private double accelerationRate;
     /**
      * Default setting in config file. Assume the elevator move 120 meter per 1 mins
      * This is reference hitachi elevator spec.
      */
-    private double minOfMeter;
+    private double maxSpeed;
     /**
      * This is for elevator talk to kiosk.
-     * When elevator let the passger in, elevator will send msg(call kiosk finishRequest() => remove the request)
+     * When elevator let the passenger in, elevator will send msg(call kiosk finishRequest() => remove the request)
      */
     private ArrayList<MBox> kioskMBox;
     /**
-     * This parameter represent height of elevator
-     * It will update every 30 ms
+     * This parameter represent the vertical position (Y-axis) of the elevator in the lift shaft.
+     * This is calculated from the ground of the cab of the lift.
      */
-    private double height = 4;
+    private double yPosition = 0; // initial position of lift
     /**
      * This parameter represent velocity of elevator
-     * It will update every 30 ms
      */
-    private double velocity = 0;
+    private double speed = 0;
     /**
      * It is an object save all the elevator data (height, breakDistance,...)
      * Other class can get the object and get those data for specific elevator
      */
+    @Deprecated
     private ElevatorStatus status;
     /**
      * Default setting in config file. Elevator will update itself for 30ms
      */
-    private int timeDuration;
+    private int updateWaitDuration;
+    /**
+     * Storing the last moment that called the {@code Simulate()}.
+     */
+    private long lastCallSimulate;
     /**
      * Use array list become mission queue
      * One is for elevator move up , one is for elevator move down
      * They will clean one direction of mission first, then use other one
      * This process will repeat
      */
-    private ArrayList<Integer> missionQueueUpward = new ArrayList<Integer>();
-    private ArrayList<Integer> missionQueueDownward = new ArrayList<Integer>();
+    private ArrayList<Floor> missionQueueUpward = new ArrayList<>();
+    private ArrayList<Floor> missionQueueDownward = new ArrayList<>();
     /**
      * Get the floor list form building for the target number
      */
     private String[] floorList;
     /**
-     * True is upward, False is downward When one direction of queue is finish, it will filp to use counter direction queue
+     * Indicates which direction of traffic this Elevator is serving and will serve first.
      */
-    private boolean direction = true;
+    private int servingDirection = 0;
 
     public Elevator(String id, Building building) {
         super(id, building);
         //Get property from building object
         this.heightOfFloor = Double.parseDouble(building.getProperty("HeightOfFloor"));
-        this.accelerationParameter = Double.parseDouble(building.getProperty("Acceleration"));
-        this.minOfMeter = Double.parseDouble(building.getProperty("MinOfMeter"));
-        this.timeDuration = Integer.parseInt(building.getProperty("TimerTicks"));
+        this.maxAccelerationRate = Double.parseDouble(building.getProperty("Acceleration"));
+        this.maxSpeed = Double.parseDouble(building.getProperty("MaxSpeed"));
+        this.updateWaitDuration = Integer.parseInt(building.getProperty("TimerTicks"));
         //Get all kiosk MBox for communication with kiosk
         kioskMBox = new ArrayList<MBox>();
         for (int i = 0; i < Kiosk.kioskCount; i++) {
@@ -100,28 +104,26 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     public final synchronized ElevatorStatus getStatus() {
         return new ElevatorStatus(
                 this,
-                height,
-                velocity,
+                yPosition,
+                speed,
                 //Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
                 // v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
-                acceleration == 0 ? 0 : Math.abs(Math.pow((velocity / 60), 2) / acceleration / 2),
-                acceleration,
-                missionQueueUpward.size() + missionQueueDownward.size());
+                accelerationRate == 0 ? 0 : Math.abs(Math.pow((speed / 60), 2) / accelerationRate / 2),
+                accelerationRate,
+                missionQueueUpward.size() + missionQueueDownward.size(),
+                servingDirection);
     }
 
     public int getElevatorId() {
         return elevatorId;
     }
 
-    public int getFloorIndex(String floorName) {
-        int count = 0;
+    public int getFloorIndex(Floor floor) {
         for (int i = 0; i < floorList.length; i++) {
-            if (floorList[i].equals(floorName)) {
-                count = i;
-                break;
-            }
+            if (floorList[i].equals(floor.getName()))
+                return i;
         }
-        return count + 1;
+        return -1;
     }
 
     /**
@@ -130,99 +132,122 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      *
      * @param target
      */
-    public void addQueue(int target, ArrayList<Integer> missionQueue, String order) {
-        queue.put(target, id);
+    public void addQueue(Floor target) {
+        queue.put(getFloorIndex(target), id);
+
+        ArrayList<Floor> missionQueue;
+        int direction = (int)(target.getYPosition() - getStatus().getYPosition());
+
+        if (direction > 0)
+            missionQueue = missionQueueUpward;
+        else
+            missionQueue = missionQueueDownward;
+
         //If the target is already in mission queue, no need to add.
-        if (!missionQueue.contains(target)) {
-            //The rearrange the mission queue(Split two mission queue one is up one is down)
-            if (order.equals("ASC")) {
-                missionQueue.add(target);
-                Collections.sort(missionQueue);
-            } else if (order.equals("DSC")) {
-                missionQueue.add(target);
-                Collections.sort(missionQueue, Collections.reverseOrder());
-            }
+        if (missionQueue.contains(target))
+            return;
+
+        missionQueue.add(target);
+
+        //The rearrange the mission queue(Split two mission queue one is up one is down)
+        if (direction > 0) {
+            Collections.sort(missionQueue);
+        } else {
+            Collections.sort(missionQueue, Collections.reverseOrder());
         }
     }
 
-    private void simulate(ArrayList<Integer> missionQueue) throws InterruptedException {
+    /**
+     * Perform physic simulations of the {@code Elevator} by changing its physic parameters during passing {@code elapseMillSec} ms of time.
+     * @throws InterruptedException
+     */
+    private void simulate() throws InterruptedException {
+        // Zero-st, we would like to know how many milliseconds passed during this and last simulate() call.
+        long elapseMillSec = System.nanoTime() - lastCallSimulate;
+
+        // set this elevator may serve any direction if both jobs are done
+        if (missionQueueUpward.size() == 0 && missionQueueDownward.size() == 0){
+            servingDirection = 0;
+            return;
+        }
+        else
+            servingDirection = 1; // or just dummy select direction
+
+        // switch direction if same direction has no jobs to work on
+        if ((servingDirection > 0 && missionQueueUpward.size() == 0) || (servingDirection < 0 && missionQueueDownward.size() == 0))
+            servingDirection = -servingDirection;
+
+        // select which queue to use, upward or downward
+        ArrayList<Floor> missionQueue;
+        if (servingDirection > 0)
+            missionQueue = missionQueueUpward;
+        else
+            missionQueue = missionQueueDownward;
+
         double brakeDistance = getStatus().getBrakeDistance();
-        int target = missionQueue.get(0);
+        Floor target = missionQueue.get(0);
+        double targetYPos = target.getYPosition();
 
-        if ((target - 1) * heightOfFloor < height) {
-            if (velocity > -1 * minOfMeter || velocity != 0) {
-                acceleration = -accelerationParameter;
+        // upward and downward use the same formula. generalised.
+        if (targetYPos != this.yPosition) {
+            if (Math.abs(speed) >= maxSpeed) {
+                speed = servingDirection * maxSpeed;
+                accelerationRate = 0;
+            } else if (Math.abs(speed) < maxSpeed) {
+                accelerationRate = servingDirection * maxAccelerationRate;
             }
-            if (((target - 1) * heightOfFloor + brakeDistance) >= height) {
+
+            // brake?
+            if (servingDirection * this.yPosition + brakeDistance >= servingDirection * targetYPos) {
                 log.info("should brake");
-                acceleration = accelerationParameter;
+                accelerationRate = servingDirection * -maxAccelerationRate;
             }
-            velocity = velocity + acceleration * timeDuration / 1000;
 
-            if (velocity > 0) {
-                velocity = 0;
-                acceleration = 0;
-            } else if (velocity < -1 * minOfMeter) {
-                velocity = -1 * minOfMeter;
-                acceleration = 0;
+            // change the physics of this elevator
+            speed = speed + accelerationRate * elapseMillSec / 1000;
+
+            // over-speed controlling
+            if (servingDirection * speed < 0) {
+                speed = 0;
+                accelerationRate = 0;
+            } else if (servingDirection * speed > maxSpeed) {
+                speed = maxSpeed;
+                accelerationRate = 0;
             }
         }
 
-        if ((target - 1) * heightOfFloor > height) {
-            if (velocity < minOfMeter || velocity != 0) {
-                acceleration = accelerationParameter;
-            }
-            if (((target - 1) * heightOfFloor - brakeDistance) <= height) {
-                log.info("should break");
-                acceleration = -accelerationParameter;
-            }
-            velocity = velocity + acceleration * timeDuration / 1000;
-            if (velocity < 0) {
-                velocity = 0;
-                acceleration = 0;
-            } else if (velocity > minOfMeter) {
-                velocity = minOfMeter;
-                acceleration = 0;
-            }
-        }
-        height += velocity * timeDuration / 1000 + 0.5 * (acceleration) * Math.pow(timeDuration / 1000, 2);
-        if (velocity == 0) {
-            height = (target - 1) * heightOfFloor;
-            queue.remove(target);
+        this.yPosition += speed * updateWaitDuration / 1000 + 0.5 * (accelerationRate) * Math.pow(updateWaitDuration / 1000, 2);
+        if (speed == 0) {
+            this.yPosition = targetYPos;
+            queue.remove(getFloorIndex(target));
             missionQueue.remove(0);
 
             //Flip the direction (true is upward and false is downward)
-            if (missionQueue.size() == 0) {
-                direction = !direction;
-            }
+//            if (missionQueue.size() == 0) {
+//                direction = !direction;
+//            }
             //This is the time of open door
             Thread.sleep(5000);
         }
-        log.info(String.format("elevator %d: height = %.2f m, %.2f m/s, %.2f m/s/s", this.getElevatorId(), height, velocity, acceleration));
+
+        // output elevator physics info
+        log.info(String.format("elevator %d: height = %.2f m, %.2f m/s, %.2f m/s/s", this.getElevatorId(), this.yPosition, speed, accelerationRate));
+
+        lastCallSimulate = System.nanoTime();
     }
 
     public void run() {
         while (true) {
-            int timerID = Timer.setTimer(id, timeDuration);
+            int timerID = Timer.setTimer(id, updateWaitDuration);
             Msg msg = mbox.receive();
 
-            if (msg.getSender().equals("Timer")) {
-                try {
-                    //At the beginning all elevator should be at the B2 floor
-                    //So elevator should solve the upward request first
-
-                    // Switch direction if same direction has no jobs to work on
-                    if ((direction && missionQueueUpward.size() == 0) || (!direction && missionQueueDownward.size() == 0))
-                        direction = !direction;
-
-                    if (direction) {
-                        simulate(missionQueueUpward);
-                    } else {
-                        simulate(missionQueueDownward);
-                    }
-                } catch (Exception ignored) {}
-            } else {
+            if (!msg.getSender().equals("Timer"))
                 break;
+
+            try {
+                simulate();
+            } catch (InterruptedException e) {
+                System.out.println("Elevator interrupted, terminating.");
             }
         }
         System.out.println(id + ": Terminating This Lift!");
@@ -255,7 +280,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         // (3=1+2)  dir * yLift + brakeDistance <= dir * yFloor
         if (availableStop = dir * yLift + brakeDistance <= dir * yFloor) {
             //Add the request to mission queue, but the queue must rearrange (ascending order)
-            addQueue(getFloorIndex(floor.getName()), missionQueueUpward, "ASC");
+            addQueue(floor);
         }
         return availableStop;
     }
