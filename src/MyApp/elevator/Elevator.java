@@ -103,8 +103,16 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * It is for every class get all the status of the elevator 
      * @return
      */
-    public final ElevatorStatus getStatus(){
-    	return new ElevatorStatus(this, height,velocity,breakDistance,acceleration, missionQueueUpward.size()+missionQueueDownward.size());
+    public final synchronized ElevatorStatus getStatus() {
+        return new ElevatorStatus(
+                this,
+                height,
+                velocity,
+                //Based on the default setting of minOfMeter and accelerationParameter to count brakDistance
+                // v^2 - u^2 = 2as, v = initial m/s, u = target m/s, a = acceleration m/s/s, s = displacement m
+                acceleration == 0 ? 0 : Math.pow((velocity / 60), 2) / acceleration / 2,
+                acceleration,
+                missionQueueUpward.size() + missionQueueDownward.size());
     }
 
     public int getElevatorId() {
@@ -186,6 +194,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     		height = (target-1) * heightOfFloor;
     		queue.remove(target);
     		missionQueue.remove(0);
+
     		//Flip the direction (true is upward and false is downward)
     		if(missionQueue.size()==0){
     			direction = !direction;
@@ -201,31 +210,30 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 	    int timerID = Timer.setTimer(id, timeDuration);
 	    Msg msg = mbox.receive();
 
-	    if (msg.getSender().equals("Timer")) {
-	    	try{
-	    		//At the beginning all elevator should be at the B2 floor
-	    		//So elevator should solve the upward request first
-	    		if (direction) {
-	    			simulate(missionQueueUpward);
-	    		}else{
-	    			simulate(missionQueueDownward);
-	    		}
-	    	}catch(Exception e){
-	    		
-	    	}
-		}else{
-			break;
-		}
-	}
-	System.out.println(id + ": Terminating This Lift!");
-	System.exit(0);
-    }
+            if (msg.getSender().equals("Timer")) {
+                try {
+                    //At the beginning all elevator should be at the B2 floor
+                    //So elevator should solve the upward request first
 
-	// TODO: JavaDoc for putNewDestination(String)
-    public final boolean putNewDestination(String floorName) {
-        Floor floor = building.getFloorPosition(floorName);
-        return putNewDestination(floor);
-	}
+                    // Switch direction if same direction has no jobs to work on
+                    if ((direction && missionQueueUpward.size() == 0) || (!direction && missionQueueDownward.size() == 0))
+                        direction = !direction;
+
+                    if (direction) {
+                        simulate(missionQueueUpward);
+                    } else {
+                        simulate(missionQueueDownward);
+                    }
+                } catch (Exception e) {
+
+                }
+            } else {
+                break;
+            }
+        }
+        System.out.println(id + ": Terminating This Lift!");
+        System.exit(0);
+    }
 
     /**
      * Building assign the request to elevator

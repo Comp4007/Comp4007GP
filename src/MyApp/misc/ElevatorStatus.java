@@ -2,7 +2,9 @@ package MyApp.misc;
 
 import MyApp.elevator.Elevator;
 
-public class ElevatorStatus {
+import java.util.Comparator;
+
+public class ElevatorStatus implements Comparable<ElevatorStatus> {
 	private Elevator elevator;
 	private double height;
 	private double velocity;
@@ -55,5 +57,10 @@ public class ElevatorStatus {
 
 	public int getQueueCount() {
 		return queueCount;
+	}
+
+	@Override
+	public int compareTo(ElevatorStatus o) {
+		return this.getElevator().compareTo(o.getElevator());
 	}
 }

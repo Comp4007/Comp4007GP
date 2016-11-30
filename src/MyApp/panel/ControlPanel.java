@@ -1,6 +1,7 @@
 package MyApp.panel;
 
 import MyApp.building.Building;
+import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.kiosk.Kiosk;
 import MyApp.misc.ElevatorStatus;
@@ -9,16 +10,20 @@ import sun.misc.JavaLangAccess;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
+import java.nio.charset.Charset;
+import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class ControlPanel implements Panel {
     private static final long statusRefreshMiliseconds = 200;
 
     private final Building building;
-    private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorStatus = new Hashtable<>();
-    private final Hashtable<Elevator, Tuple<JLabel, JLabel>> labelsElevatorQueue = new Hashtable<>();
-    private final Hashtable<Kiosk, Tuple<JLabel, JLabel>> labelsKioskQueue = new Hashtable<>();
+    private final ConcurrentHashMap<Elevator, Tuple<JLabel, JLabel>> labelsElevatorStatus = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Elevator, Tuple<JLabel, JLabel>> labelsElevatorQueue = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Kiosk, Tuple<JLabel, JLabel>> labelsKioskQueue = new ConcurrentHashMap<>();
     private JFrame frmControlPanel;
 
     private JPanel panelWrapper;
@@ -44,9 +49,9 @@ public class ControlPanel implements Panel {
 
         Thread threadControlPanelRefresh = new Thread(() -> {
             while (true) {
-                this.building.getElevatorStatus().forEach(this::updateElevatorStatus);
-                this.building.getElevators().forEach(this::updateElevatorQueue);
-                this.building.getKiosks().forEach(this::updateKioskQueue);
+                this.building.getElevatorStatus().stream().sorted().forEach(this::updateElevatorStatus);
+                this.building.getElevators().stream().sorted().forEach(this::updateElevatorQueue);
+                this.building.getKiosks().stream().sorted().forEach(this::updateKioskQueue);
 
                 try {
                     Thread.sleep(statusRefreshMiliseconds);
@@ -110,14 +115,6 @@ public class ControlPanel implements Panel {
         gbc.weightx = 5.0;
         gbc.anchor = GridBagConstraints.WEST;
         JLabel lblElevatorStatus0 = new JLabel();
-        lblElevatorStatus0.setText(
-                String.format(
-                        "YPos = %.2f m, Spd = %.2f m/s, Acc = %.2f m/s/s",
-                        elevatorStatus.getYPosition(),
-                        elevatorStatus.getVelocity(),
-                        elevatorStatus.getAcceleration()
-                )
-        );
         panelElevatorStatus.add(lblElevatorStatus0, gbc);
 
         this.labelsElevatorStatus.put(elevatorStatus.getElevator(), new Tuple<>(lblElevatorStatusTitle0, lblElevatorStatus0));
@@ -128,6 +125,7 @@ public class ControlPanel implements Panel {
 
         if (labels == null) {
             this.addElevatorStatus(elevatorStatus);
+            updateElevatorStatus(elevatorStatus);
             return;
         }
 
@@ -163,12 +161,6 @@ public class ControlPanel implements Panel {
         gbc.weightx = 5.0;
         gbc.anchor = GridBagConstraints.WEST;
         JLabel lblElevatorQueue0 = new JLabel();
-        lblElevatorQueue0.setText(
-                String.format(
-                        "[%s]",
-                        String.join(", ", elevator.getQueue().values())
-                )
-        );
         panelElevatorQueue.add(lblElevatorQueue0, gbc);
 
         this.labelsElevatorQueue.put(elevator, new Tuple<>(lblElevatorQueueTitle0, lblElevatorQueue0));
@@ -179,6 +171,7 @@ public class ControlPanel implements Panel {
 
         if (labels == null) {
             this.addElevatorQueue(elevator);
+            updateElevatorQueue(elevator);
             return;
         }
 
@@ -212,12 +205,6 @@ public class ControlPanel implements Panel {
         gbc.weightx = 5.0;
         gbc.anchor = GridBagConstraints.WEST;
         JLabel lblKioskQueue0 = new JLabel();
-        lblKioskQueue0.setText(
-                String.format(
-                        "[%s]",
-                        String.join(", ", kiosk.getQueue().values())
-                )
-        );
         panelKiosksQueues.add(lblKioskQueue0, gbc);
 
         this.labelsKioskQueue.put(kiosk, new Tuple<>(lblKioskFloor0, lblKioskQueue0));
@@ -228,14 +215,22 @@ public class ControlPanel implements Panel {
 
         if (labels == null) {
             this.addKioskQueue(kiosk);
+            updateKioskQueue(kiosk);
             return;
         }
 
+        LinkedList<String> queueStrs = new LinkedList<>();
+
+        kiosk.getDestinationQueue().forEach((e, fs) -> {
+            String floorsStr = String.join(", ", fs.stream().map(Floor::getName).collect(Collectors.toList()));
+
+            queueStrs.add(
+                    String.format("%s: [%s]", e.getID(), floorsStr)
+            );
+        });
+
         labels.y.setText(
-                String.format(
-                        "[%s]",
-                        String.join(", ", kiosk.getQueue().values())
-                )
+                String.join(", ", queueStrs)
         );
     }
 

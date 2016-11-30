@@ -407,8 +407,8 @@ public class Building {
      * @return A string array of all floor names.
      */
     public final String[] getFloorNames() {
-        Map<String, Floor> fp = getFloorPositions();
-        return fp.keySet().toArray(new String[fp.size()]);
+        Collection<Floor> floors = getFloorPositions().values();
+        return floors.stream().sorted().map(Floor::getName).toArray(String[]::new);
     }
 
     /**
@@ -461,7 +461,6 @@ public class Building {
 
             // push back to the lift to update its next destination.
             if (es.getElevator().putNewDestination(src)) {
-                es.getElevator().putNewDestination(dest);
                 // return an Elevator that such src:dest pair assigned to
                 return es.getElevator();
             }
@@ -469,5 +468,20 @@ public class Building {
 
         // return null if retried many times but failed at all
         return null;
+    }
+
+    public Collection<Elevator> getDestinationsFromElevator(Floor floor) {
+        LinkedList<Elevator> elevators = new LinkedList<>();
+
+        for (Elevator e : getElevators()) {
+            double elevYPos = e.getStatus().getYPosition();
+            double floorYPos = floor.getYDisplacement();
+
+            if (elevYPos < floorYPos - 0.05 || elevYPos > floorYPos + 0.05)
+                continue;
+            elevators.add(e);
+        }
+
+        return elevators;
     }
 }

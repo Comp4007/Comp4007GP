@@ -4,18 +4,22 @@ import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.logging.Level;
 
 import MyApp.building.Building;
 
 
-public class Kiosk extends AppThread {
+public class Kiosk extends AppThread implements Comparable<Kiosk> {
     public static int kioskCount = 0;
     private int kioskid;
     private KioskPanel kp;
     private Floor floor;
     private RFID rfid;
+
+    private HashMap<Elevator, LinkedHashSet<Floor>> awaitingDestinations = new HashMap<>();
 
     public Kiosk(String id, Building building, Floor floor) {
         super(id, building);
@@ -48,8 +52,21 @@ public class Kiosk extends AppThread {
             return "Assigned not success.";
         } else {
             log.info(String.format("Floor \"%s\" request assigned to elevator %d", target, assignedTo.getElevatorId()));
+            putNewElevatorDestination(assignedTo, building.getFloorPosition(target));
             return "Floor" + target + " request assigned to elevator " + assignedTo.getID();
         }
+    }
+
+    private void putNewElevatorDestination(Elevator e, Floor dest) {
+        LinkedHashSet<Floor> floors;
+
+        if ((floors = this.awaitingDestinations.get(e)) == null) {
+            LinkedHashSet<Floor> newLinkedHashSet = new LinkedHashSet<>();
+            this.awaitingDestinations.put(e, newLinkedHashSet);
+            floors = newLinkedHashSet;
+        }
+
+        floors.add(dest);
     }
 
     protected String readKeypad(String destFloor) {
@@ -72,19 +89,26 @@ public class Kiosk extends AppThread {
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
         //TODO search if any elevator is arrived
-        kp.updateDisplay("texting",kioskid);
-        finishRequest("");
+        finishHopRequest();
     }
 
-    public HashMap<Integer, String> getQueue() {
-        return queue;
+    public HashMap<Elevator, LinkedHashSet<Floor>> getDestinationQueue() {
+        return this.awaitingDestinations;
     }
 
-    //TODO:  finishRequest
-    private void finishRequest(String elevatorID) {
-        //delete all element in queue with this elevatorID
+    /**
+     * Request the building centralised controller to fetch all docked <code>Elevators</code>, and putting destination floors from Kiosk into
+     */
+    private void finishHopRequest() {
+        for (Elevator e : building.getDestinationsFromElevator(this.getFloor())) {
+            LinkedHashSet<Floor> destFloors = this.awaitingDestinations.remove(e);
+            if (destFloors == null) continue;
+            destFloors.forEach(e::putNewDestination);
+        }
     	
     }
+
+
 
     public void run() {
         //create GUI with RFID/keypad input
@@ -92,5 +116,10 @@ public class Kiosk extends AppThread {
         //System.out.println(id + ": Received msg: " + msg);
 
         //call finish request if elevator tell kiosk the request is finished
+    }
+
+    @Override
+    public int compareTo(Kiosk o) {
+        return this.getID().compareTo(o.getID());
     }
 }

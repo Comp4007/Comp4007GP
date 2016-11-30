@@ -1,9 +1,9 @@
 package MyApp.misc;
 
+import MyApp.building.Building;
+
 import java.util.HashMap;
 import java.util.logging.Logger;
-
-import MyApp.building.Building;
 
 
 //======================================================================
