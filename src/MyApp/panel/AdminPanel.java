@@ -29,7 +29,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import MyApp.kiosk.RFID;
+import MyApp.misc.RFID;
 
 import javax.swing.JLabel;
 
