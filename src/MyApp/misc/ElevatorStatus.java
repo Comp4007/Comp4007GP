@@ -2,6 +2,8 @@ package MyApp.misc;
 
 import MyApp.elevator.Elevator;
 
+// TODO: javadocs for properties and methods in ElevatorStatus
+
 public class ElevatorStatus implements Comparable<ElevatorStatus> {
 	private Elevator elevator;
 	private double height;
