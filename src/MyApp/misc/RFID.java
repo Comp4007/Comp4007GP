@@ -24,7 +24,8 @@ public class RFID {
      	   // unless content matches data to get the floor 
      	   while ((line = br.readLine()) != null) {
      		   if (line.contains(id)) {
-     			   floor = line.split(",")[1];
+     			   if(line.split(",")[0].contentEquals(id))
+     				   floor = line.split(",")[1];
      			   break;
      		   }
      	   }
