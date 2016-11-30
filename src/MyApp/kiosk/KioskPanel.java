@@ -1,7 +1,7 @@
 package MyApp.kiosk;
 
 import MyApp.building.Building;
-import java.util.Random;
+import MyApp.misc.RFID;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -16,6 +16,7 @@ import java.awt.Insets;
 import MyApp.building.Floor;
 import MyApp.panel.Panel;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -33,7 +34,6 @@ public class KioskPanel implements Panel{
 	private JTextField display;
 	private Building building;
 	private String[] floorList;
-	private final String dbFName = "etc/RFID_DB";
 	private String[] displayText;
 	private String[] RFIDlist;
 	private Kiosk kiosk;
@@ -69,6 +69,7 @@ public class KioskPanel implements Panel{
 		floorList = building.getFloorNames();
 		displayText = new String[floorList.length];
 		rfid = new RFID();
+		RFIDlist = rfid.getAllTheId().parallelStream().toArray(String[]::new);
 		kiosk = (Kiosk) building.getThread("k0");
 		kioskNum = 0;
 		initialize();
@@ -129,14 +130,13 @@ public class KioskPanel implements Panel{
 		gbc_display.gridy = 1;
 		panel.add(display, gbc_display);
 		display.setColumns(1);
-		ActionListener actionListener = new ActionListener() {
+		ActionListener displayListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
 	        	display.setText(displayText[kioskNum]);
 	        }
 	    };
-	    Timer timer = new Timer(1000, actionListener);
+	    Timer timer = new Timer(1000, displayListener);
 	    timer.start();
-		
 		
 		JLabel lblKeypad = new JLabel("Keypad");
 		GridBagConstraints gbc_lblKeypad = new GridBagConstraints();
@@ -165,7 +165,7 @@ public class KioskPanel implements Panel{
 		//=================================================================
 		
 		//RFID reader
-		JComboBox RFIDCbx = new JComboBox(rfid.getAllTheId().parallelStream().toArray(String[]::new));
+		JComboBox <String> RFIDCbx = new JComboBox<String>(RFIDlist);
 		RFIDCbx.setEditable(true);
 		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
 		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
@@ -173,7 +173,17 @@ public class KioskPanel implements Panel{
 		gbc_RFIDCbx.gridx = 2;
 		gbc_RFIDCbx.gridy = 4;
 		panel.add(RFIDCbx, gbc_RFIDCbx);
-		
+		//update rfid list for ever minutes
+		ActionListener rfidUpdateListener = new ActionListener() {
+	        public void actionPerformed(ActionEvent actionEvent) {
+	        	RFIDlist = rfid.getAllTheId().parallelStream().toArray(String[]::new);
+	        	DefaultComboBoxModel model = new DefaultComboBoxModel( RFIDlist );
+	        	RFIDCbx.setModel( model );
+	        }
+	    };
+	    Timer timer2 = new Timer(60000, rfidUpdateListener);
+	    timer2.start();
+	    
 		JButton btnSummit = new JButton("Keypad Summit");
 		GridBagConstraints gbc_btnSummit = new GridBagConstraints();
 		gbc_btnSummit.gridwidth = 2;
