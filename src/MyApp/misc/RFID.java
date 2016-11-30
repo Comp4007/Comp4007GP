@@ -93,6 +93,7 @@ public class RFID {
      		   pw.println(line);
      		   pw.flush();
      	   }
+     	  System.out.println("Update data sucessfully");
      	   pw.close();
      	   br.close();
      	   // Delete the original file
@@ -127,6 +128,7 @@ public class RFID {
             	writer.write(currentLine + System.getProperty("line.separator"));
             }
         }
+        System.out.println("Delete data sucessfully");
         writer.close(); 
         reader.close(); 
         boolean successful = tempFile.renameTo(inputFile);
