@@ -10,11 +10,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 public class RFID {
-	private ArrayList<String> id = new ArrayList<String>();
 	//Used to check if valid floor is inputed
 	
 	public RFID(){
 	}
+	
 	
 	public String getFloorById(String id){
 		String floor = "na";
@@ -40,7 +40,10 @@ public class RFID {
 	}
 	
 	public ArrayList<String> getAllTheId(){
+		ArrayList<String> id = new ArrayList<String>();
+		
 		try{
+				id.clear();
 	     	   File database = new File("etc/RFID_DB");
 	     	   BufferedReader br = new BufferedReader(new FileReader(database));
 

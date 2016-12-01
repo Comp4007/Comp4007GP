@@ -164,7 +164,7 @@ public class KioskPanel implements Panel{
 		//=================================================================
 		
 		//RFID reader
-		JComboBox <String> RFIDCbx = new JComboBox<String>(RFIDlist);
+		JComboBox RFIDCbx = new JComboBox(RFIDlist);
 		RFIDCbx.setEditable(true);
 		GridBagConstraints gbc_RFIDCbx = new GridBagConstraints();
 		gbc_RFIDCbx.insets = new Insets(0, 0, 5, 0);
@@ -175,12 +175,15 @@ public class KioskPanel implements Panel{
 		//update rfid list for ever minutes
 		ActionListener rfidUpdateListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
-	        	RFIDlist = rfid.getAllTheId().parallelStream().toArray(String[]::new);
-	        	DefaultComboBoxModel model = new DefaultComboBoxModel( RFIDlist );
-	        	RFIDCbx.setModel( model );
+	        	System.out.println("Refresh rfid database");
+	        	Arrays.fill(RFIDlist, null);
+	    		RFIDlist = rfid.getAllTheId().parallelStream().toArray(String[]::new);
+	        	RFIDCbx.removeAllItems();
+	        	for(String rf : RFIDlist)
+	        		RFIDCbx.addItem(rf);
 	        }
 	    };
-	    Timer timer2 = new Timer(60000, rfidUpdateListener);
+	    Timer timer2 = new Timer(6000, rfidUpdateListener);
 	    timer2.start();
 	    
 		JButton btnSubmit = new JButton("Keypad Submit");
@@ -231,7 +234,9 @@ public class KioskPanel implements Panel{
 		panel.add(btnEE, gbc_btnEE);
 	}
 	
-	protected void updateDisplay(String text,int id){
-		displayText[id] = text;
+	protected void updateDisplay(String text){
+		displayText[kioskNum] = text;
+		System.out.println(displayText[kioskNum] + "/" + text);
+    	display.setText(displayText[kioskNum]);
 	}
 }
