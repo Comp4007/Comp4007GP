@@ -164,7 +164,6 @@ public class Building {
      * Java.exe entry point for loading up the Building simulation element.
      */
     public static void main(String args[]) {
-        Panel window = new AdminPanel();
         Building building;
         try {
             building = new Building();
@@ -173,7 +172,8 @@ public class Building {
             e.printStackTrace();
             return;
         }
-
+        
+        Panel window = new AdminPanel(building.getFloorNames());
 
         java.lang.Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

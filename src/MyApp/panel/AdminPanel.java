@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -14,6 +15,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
+import MyApp.building.Building;
 import MyApp.misc.RFID;
 
 import javax.swing.JLabel;
@@ -21,10 +23,13 @@ import javax.swing.JLabel;
 public class AdminPanel implements Panel{
 	private JFrame frame;
 	private JTable table;
+	private String[] flrList;
 	private final String dbFName = "etc/RFID_DB";
+	
 	private final RFID rf = new RFID();
 
-	public AdminPanel(){
+	public AdminPanel(String[] flrList){
+		this.flrList = flrList;
 		initialize();
 	}
 	
@@ -143,8 +148,8 @@ public class AdminPanel implements Panel{
         lblNewLabel_2.setBounds(383, 222, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
-        JButton btnCleanInput = new JButton("Clean input");
-        btnCleanInput.addActionListener(new ActionListener() {
+        JButton btnCencel = new JButton("Cencel");
+        btnCencel.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent arg0) {
             	textId.setText("");
             	textFname.setText("");
@@ -152,8 +157,13 @@ public class AdminPanel implements Panel{
             	textAge.setText("");
         	}
         });
-        btnCleanInput.setBounds(349, 353, 299, 23);
-        frame.getContentPane().add(btnCleanInput);
+        btnCencel.setBounds(349, 353, 299, 23);
+        frame.getContentPane().add(btnCencel);
+        
+        JLabel lblErrorDisplay = new JLabel();
+        lblErrorDisplay.setBounds(358, 328, 289, 14);
+        frame.getContentPane().add(lblErrorDisplay);
+        
         
         // create an array of objects to set the row data
         Object[] row = new Object[4];
@@ -185,10 +195,16 @@ public class AdminPanel implements Panel{
                 row[2] = textLname.getText();
                 row[3] = textAge.getText();
                 
-                // add row to the model
-                model.addRow(row);
-                String line = row[0]+","+row[1]+","+row[2]+","+row[3];
-                rf.insertData(line);
+                //Ensure floor name is valid
+                if(Arrays.asList(flrList).contains(row[1])){
+	                // add row to the model
+	                model.addRow(row);
+	                String line = row[0]+","+row[1]+","+row[2]+","+row[3];
+	                rf.insertData(line);
+	                lblErrorDisplay.setText("Insert data sucessfully");
+                }else{
+                	lblErrorDisplay.setText("Wrong floor input, please try again.");
+                }
             }
         });
         
@@ -201,7 +217,7 @@ public class AdminPanel implements Panel{
                 // i = the index of the selected row
                 int i = table.getSelectedRow();
                 String line = "";
-                if(i >= 0) 
+                if(i >= 0 & Arrays.asList(flrList).contains(textFname.getText())) 
                 {
                    model.setValueAt(textId.getText(), i, 0);
                    model.setValueAt(textFname.getText(), i, 1);
@@ -209,9 +225,13 @@ public class AdminPanel implements Panel{
                    model.setValueAt(textAge.getText(), i, 3);
                    line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
                    rf.updateData(textId.getText(), line);  
+                   lblErrorDisplay.setText("Update data sucessfully");
                 }
-                else{
+                else if(!Arrays.asList(flrList).contains(textFname.getText())){
+                	lblErrorDisplay.setText("Wrong floor input, please try again.");
+                }else{
                     System.out.println("Update Error");
+                    lblErrorDisplay.setText("Update Error");
                 }
             }
         });
@@ -230,8 +250,9 @@ public class AdminPanel implements Panel{
                     model.removeRow(i);
                     line = textId.getText()+","+textFname.getText()+","+textLname.getText()+","+textAge.getText();
                     rf.deleteData(line);
+                    lblErrorDisplay.setText("Delete Data Successfully");
                 }else{
-                    System.out.println("Delete Error");
+                    lblErrorDisplay.setText("Delete Error");
                 }            
             }
         });

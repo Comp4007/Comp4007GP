@@ -37,6 +37,11 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         this.floor = floor;
     }
 
+    /**
+     * 
+     * @param target
+     * @return
+     */
     public String addRequest(String target) {
         // String elevatorID = building.getResult(target, id);
         Elevator assignedTo = null;
@@ -56,6 +61,11 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         }
     }
 
+    /**
+     * 
+     * @param e
+     * @param dest
+     */
     private void putNewElevatorDestination(Elevator e, Floor dest) {
         LinkedHashSet<Floor> floors;
 
@@ -87,6 +97,8 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
 
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
+        System.
+        kp.updateDisplay("Door open", kioskid);
         //TODO search if any elevator is arrived
         finishHopRequest();
     }
@@ -112,7 +124,7 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
     public void run() {
         //create GUI with RFID/keypad input
         Msg msg = mbox.receive();
-        //System.out.println(id + ": Received msg: " + msg);
+        System.out.println(id + ": Received msg: " + msg);
 
         //call finish request if elevator tell kiosk the request is finished
     }

@@ -11,8 +11,10 @@ import java.util.ArrayList;
 
 public class RFID {
 	private ArrayList<String> id = new ArrayList<String>();
+	//Used to check if valid floor is inputed
 	
-	public RFID(){}
+	public RFID(){
+	}
 	
 	public String getFloorById(String id){
 		String floor = "na";
