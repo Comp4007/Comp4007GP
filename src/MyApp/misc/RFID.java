@@ -7,6 +7,11 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 public class RFID {
@@ -140,5 +145,16 @@ public class RFID {
         }catch (Exception ex){
         	System.out.println("Delete Error");
         }
+	}
+	
+	public void backUp() throws IOException{
+		Path FROM = Paths.get("etc/RFID_DB");
+	    Path TO = Paths.get("etc/RFID_Backup");
+	  //overwrite existing file, if exists
+	    CopyOption[] options = new CopyOption[]{
+	      StandardCopyOption.REPLACE_EXISTING,
+	      StandardCopyOption.COPY_ATTRIBUTES
+	    }; 
+		Files.copy(FROM,TO,options);
 	}
 }

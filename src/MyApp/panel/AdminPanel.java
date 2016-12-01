@@ -272,17 +272,10 @@ public class AdminPanel implements Panel{
             @Override
             public void actionPerformed(ActionEvent e) {
             	try{
-            		Path FROM = Paths.get("etc/RFID_DB");
-            	    Path TO = Paths.get("etc/RFID_Backup");
-            	  //overwrite existing file, if exists
-            	    CopyOption[] options = new CopyOption[]{
-            	      StandardCopyOption.REPLACE_EXISTING,
-            	      StandardCopyOption.COPY_ATTRIBUTES
-            	    }; 
-            		Files.copy(FROM,TO,options);
-            		System.out.println("Backup sucessfully");
+            		rf.backUp();
+            		lblErrorDisplay.setText("Backup sucessfully");
             	}catch(Exception ex){
-            		System.out.println("Cannot back up the data from database");
+            		lblErrorDisplay.setText("Cannot back up the data from database");
             	}
             
             }
