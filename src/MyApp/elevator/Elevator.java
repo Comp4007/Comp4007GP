@@ -200,15 +200,17 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
                 accelerationRate = servingDirection * maxAccelerationRate;
             }
 
+            double whatYPosWillBeIfNotBrake = this.yPosition + (speed + accelerationRate * elapseMillSec / 1000) * elapseMillSec / 1000 + 0.5 * (accelerationRate) * Math.pow(elapseMillSec / 1000, 2);
+
             // brake?
 //            log.info(String.format("??? %.3f >= %.3f ???", yPosition, targetYPos - brakeDistance));
-            if (servingDirection * this.yPosition >= servingDirection * targetYPos - servingDirection * brakeDistance) {
+            if (servingDirection * whatYPosWillBeIfNotBrake >= servingDirection * (targetYPos - servingDirection * (brakeDistance + 0.05))) {
                 log.info("should brake");
                 accelerationRate = servingDirection * -maxAccelerationRate;
             }
 
             // change the physics of this elevator
-            speed = speed + accelerationRate * elapseMillSec / 1000;
+            speed += accelerationRate * elapseMillSec / 1000;
 
             // over-speed controlling
             if (servingDirection * speed < 0) {
@@ -221,6 +223,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         }
 
         this.yPosition += speed * elapseMillSec / 1000 + 0.5 * (accelerationRate) * Math.pow(elapseMillSec / 1000, 2);
+
         if (speed == 0) {
             this.yPosition = targetYPos;
             queue.remove(getFloorIndex(target));
