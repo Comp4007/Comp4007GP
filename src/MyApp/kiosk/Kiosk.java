@@ -108,7 +108,6 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         kioskUpdate = "Door open";
         //TODO search if any elevator is arrived
         finishHopRequest();
-        kioskUpdate = "Door close";
     }
 
     public HashMap<Elevator, LinkedHashSet<Floor>> getDestinationQueue() {
@@ -127,8 +126,6 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
     	
     }
 
-
-
     public void run() {
         //create GUI with RFID/keypad input
         Msg msg = mbox.receive();
@@ -143,12 +140,10 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
     }
 
 	public String getUpdate() {
-		// TODO Auto-generated method stub
 		return kioskUpdate;
 	}
 	
 	public void setUpdate(String text) {
-		// TODO Auto-generated method stub
 		kioskUpdate = text;
 	}
 }
