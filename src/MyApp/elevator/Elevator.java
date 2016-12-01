@@ -10,6 +10,9 @@ import java.util.Collections;
 import MyApp.building.Building;
 import MyApp.kiosk.Kiosk;
 
+/**
+ * Represents an vertical-moving elevator used on a real life.
+ */
 public class Elevator extends AppThread implements Comparable<Elevator> {
     /**
      * This is count number of elevator. Also for building getElevatorQueueString() to get no. of elevator
@@ -80,6 +83,11 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      */
     private int servingDirection = 0;
 
+    /**
+     * Creates an {@code Elevator} instance.
+     * @param id The ID to be used.
+     * @param building Building which this elevator belongs to.
+     */
     public Elevator(String id, Building building) {
         super(id, building);
         //Get property from building object
@@ -97,9 +105,8 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
     }
 
     /**
-     * It is for every class get all the status of the elevator
-     *
-     * @return
+     * Outputs the physics and operational status of this elevator.
+     * @return The {@code ElevatorStatus} object instance that represents its status of this elevator at the moment.
      */
     public final synchronized ElevatorStatus getStatus() {
         return new ElevatorStatus(
@@ -114,10 +121,19 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
                 servingDirection);
     }
 
+    /**
+     * Get the Elevator-specific ID of this elevator.
+     * @return The ID of this elevator.
+     */
     public int getElevatorId() {
         return elevatorId;
     }
 
+    /**
+     * Get the index of floor in floor names dictionary.
+     * @param floor The floor to ask for.
+     * @return The index in the dictionary.
+     */
     public int getFloorIndex(Floor floor) {
         for (int i = 0; i < floorList.length; i++) {
             if (floorList[i].equals(floor.getName()))
@@ -130,7 +146,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
      * When building finish the simulate, the target result will use this method to pass in elevator mission queue
      * When elevator accept the request from building, it will rearrange the mission queue
      *
-     * @param target
+     * @param target The destination floor to hop on.
      */
     public void addQueue(Floor target) {
         queue.put(getFloorIndex(target), id);
@@ -159,7 +175,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
 
     /**
      * Perform physic simulations of the {@code Elevator} by changing its physic parameters during passing {@code elapseMillSec} ms of time.
-     * @throws InterruptedException
+     * @throws InterruptedException If this thread is interrupted by any other threads that needs it to be terminated.
      */
     private void simulate(long elapseMillSec) throws InterruptedException {
 
@@ -200,6 +216,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
                 accelerationRate = servingDirection * maxAccelerationRate;
             }
 
+            // estimate if continue to accelerate, where this life will be at, where it should actually brake?
             double whatYPosWillBeIfNotBrake = this.yPosition + (speed + accelerationRate * elapseMillSec / 1000) * elapseMillSec / 1000 + 0.5 * (accelerationRate) * Math.pow(elapseMillSec / 1000, 2);
 
             // brake?
@@ -222,18 +239,16 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
             }
         }
 
+        // do a movement physics
         this.yPosition += speed * elapseMillSec / 1000 + 0.5 * (accelerationRate) * Math.pow(elapseMillSec / 1000, 2);
 
+        // if this lift is stable then it must reached the target, remove one
         if (speed == 0) {
             this.yPosition = targetYPos;
             queue.remove(getFloorIndex(target));
             missionQueue.remove(0);
 
-            //Flip the direction (true is upward and false is downward)
-//            if (missionQueue.size() == 0) {
-//                direction = !direction;
-//            }
-            //This is the time of open door
+            // simulation of time to open the door
             Thread.sleep(5000);
         }
 
@@ -243,6 +258,9 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         lastCallSimulate = System.nanoTime();
     }
 
+    /**
+     * Called by the {@code Thread} class to simulate every elapse of running this elevator.
+     */
     public void run() {
         while (true) {
             int timerID = Timer.setTimer(id, updateWaitDuration);
@@ -293,6 +311,11 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
         return availableStop;
     }
 
+    /**
+     * Comparing this {@code Elevator} with another {@code Elevator}.
+     * @param o The another elevator to be compared with.
+     * @return An integer which indicates that this or another elevator has higher priority to be listed.
+     */
     @Override
     public int compareTo(Elevator o) {
         return this.elevatorId - o.elevatorId;

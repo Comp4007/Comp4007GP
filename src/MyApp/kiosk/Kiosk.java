@@ -139,7 +139,7 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
      * Request the building centralised controller to fetch all docked <code>Elevators</code>, and putting destination floors from Kiosk into
      */
     private void finishHopRequest() {
-        for (Elevator e : building.getDestinationsFromElevator(this.getFloor())) {
+        for (Elevator e : building.getDockedElevatorsFromFloor(this.getFloor())) {
             LinkedHashSet<Floor> destFloors = this.awaitingDestinations.remove(e);
             if (destFloors == null) continue;
             destFloors.forEach(e::putNewDestination);
