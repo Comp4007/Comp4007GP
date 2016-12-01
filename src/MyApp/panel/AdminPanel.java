@@ -143,6 +143,18 @@ public class AdminPanel implements Panel{
         lblNewLabel_2.setBounds(383, 222, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
+        JButton btnCleanInput = new JButton("Clean input");
+        btnCleanInput.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent arg0) {
+            	textId.setText("");
+            	textFname.setText("");
+            	textLname.setText("");
+            	textAge.setText("");
+        	}
+        });
+        btnCleanInput.setBounds(349, 353, 299, 23);
+        frame.getContentPane().add(btnCleanInput);
+        
         // create an array of objects to set the row data
         Object[] row = new Object[4];
         
@@ -226,10 +238,9 @@ public class AdminPanel implements Panel{
         
         //jframe property
         frame.setTitle("RFID Admin Panel");
-        frame.setSize(667,434);
+        frame.setSize(673,452);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-
 }
 

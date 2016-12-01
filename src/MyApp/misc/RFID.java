@@ -67,6 +67,7 @@ public class RFID {
         	{ 
         	    out.println(data);
         	    System.out.println("Insert data sucessfully");
+        	    fw.close();
         	    bw.close();
         	    out.close();
         	} catch (IOException ex) {
@@ -128,10 +129,10 @@ public class RFID {
             	writer.write(currentLine + System.getProperty("line.separator"));
             }
         }
-        System.out.println("Delete data sucessfully");
         writer.close(); 
         reader.close(); 
         boolean successful = tempFile.renameTo(inputFile);
+        System.out.println("Delete data sucessfully " + successful);
         }catch (Exception ex){
         	System.out.println("Delete Error");
         }
