@@ -20,7 +20,7 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
 		this.breakDistance = breakDistance;
 		this.acceleration = acceleration;
 		this.queueCount = queueCount;
-        this.servingDirection = servingDirection;
+		setServingDirection(servingDirection);
     }
 
 	public Elevator getElevator() {
@@ -69,4 +69,13 @@ public class ElevatorStatus implements Comparable<ElevatorStatus> {
     public int getServingDirection() {
         return servingDirection;
     }
+
+    private void setServingDirection(int value) {
+		if (value > 0)
+			this.servingDirection = 1;
+		else if (value < 0)
+			this.servingDirection = -1;
+		else
+			this.servingDirection = 0;
+	}
 }

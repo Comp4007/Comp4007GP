@@ -8,10 +8,10 @@ import java.util.Comparator;
  * Comparator for Elevator to compare and sort distance between a Floor and all Elevators.
  */
 class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStatus> {
-    boolean goingUp;
-    Floor floor;
+    private final boolean goingUp;
+    private final Floor floor;
 
-    public ElevatorStatusDistanceToFloorComparator(boolean goingUp, Floor floor) {
+    ElevatorStatusDistanceToFloorComparator(boolean goingUp, Floor floor) {
         this.goingUp = goingUp;
         this.floor = floor;
     }
@@ -23,6 +23,13 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
         int resultQueueCount = o1.getQueueCount() - o2.getQueueCount();
         if (resultQueueCount != 0)
             return resultQueueCount;
+
+        // distance to src + brake distance
+        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getActualDirection() * o1.getBrakeDistance()) - floor.getYPosition());
+        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getActualDirection() * o2.getBrakeDistance()) - floor.getYPosition());
+        int resultDistanceToSrc = (int) distanceToSrcElevator1 - (int) distanceToSrcElevator2;
+        if (resultDistanceToSrc != 0)
+            return resultDistanceToSrc;
 
         // direction: same, still, reverse
         int resultDirection = 0;
@@ -41,13 +48,6 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
         int resultVelocity = Math.abs((int) o1.getVelocity()) - Math.abs((int) o2.getVelocity());
         if (resultVelocity != 0)
             return resultVelocity;
-
-        // distance to src + brake distance
-        double distanceToSrcElevator1 = Math.abs(Math.abs(o1.getYPosition() + o1.getActualDirection() * o1.getBrakeDistance()) - floor.getYPosition());
-        double distanceToSrcElevator2 = Math.abs(Math.abs(o2.getYPosition() + o2.getActualDirection() * o2.getBrakeDistance()) - floor.getYPosition());
-        int resultDistanceToSrc = (int) distanceToSrcElevator1 - (int) distanceToSrcElevator2;
-        if (resultDistanceToSrc != 0)
-            return resultDistanceToSrc;
 
         return 0;
     }
