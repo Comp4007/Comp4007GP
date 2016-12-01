@@ -142,7 +142,7 @@ public class KioskPanel implements Panel{
 	        	display.setText(displayText[kioskNum]);
 	        }
 	    };
-	    Timer timer = new Timer(1000, displayListener);
+	    Timer timer = new Timer(100, displayListener);
 	    timer.start();
 		
 		JLabel lblKeypad = new JLabel("Keypad");

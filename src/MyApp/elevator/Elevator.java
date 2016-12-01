@@ -286,6 +286,7 @@ public class Elevator extends AppThread implements Comparable<Elevator> {
             //Add the request to mission queue, but the queue must rearrange (ascending order)
             addQueue(floor);
         }
+
         return availableStop;
     }
 

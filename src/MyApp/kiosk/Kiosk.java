@@ -121,10 +121,10 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
      */
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
-        System.out.println("Door open/" + kioskid);
-        kioskUpdate = "Door open";
+        kioskUpdate = "Elevator arrived";
         //TODO search if any elevator is arrived
         finishHopRequest();
+        
     }
 
     /**
@@ -154,7 +154,7 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         //create GUI with RFID/keypad input
         Msg msg = mbox.receive();
         System.out.println(id + ": Received msg: " + msg);
-
+        
         //call finish request if elevator tell kiosk the request is finished
     }
 
