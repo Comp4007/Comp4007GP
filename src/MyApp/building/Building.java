@@ -436,25 +436,16 @@ public class Building {
         if (src.equals(dest))
             return null; // won't assign any but shit you donk
 
-        boolean goingUp = dest.getYPosition() - src.getYPosition() > 0;
+        boolean isGoingUp = dest.getYPosition() - src.getYPosition() > 0;
 
         // TODO: sort by: queueCount, direction, distance to src, speed (~=braking dist)
         // TODO: calculate which lift to catch the request
         LinkedList<ElevatorStatus> ess = new LinkedList<>(elevatorsStatuses.values());
-//        ess.sort(new ElevatorStatusDistanceToFloorComparator(goingUp, src));
+        ess.sort(new ElevatorStatusDistanceToFloorComparator(isGoingUp, src));
 
         int tries = 0;
         for (int i = 0; i < ess.size() && tries < putStoppingHopMaxRetries; i = ++tries % ess.size()) {
             ElevatorStatus es = ess.get(i);
-
-            // ignoring such code, calculate if may stop within floor level by the Elevator itself.
-            /*
-            int direction = goingUp ? 1 : -1;
-            double displacementElevatorStop = es.getYPosition() + es.getActualDirection() * es.getBrakeDistance();
-            double displacementFloor = dest.getYPosition();
-            if (direction * displacementElevatorStop < direction * displacementFloor) // eg: 35 < 30 (going up) = false -> fail; -40 < -20 (going down) = true -> work
-                continue;
-            */
 
             // push back to the lift to update its next destination.
             if (es.getElevator().putNewDestination(src)) {
