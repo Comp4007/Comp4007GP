@@ -1,6 +1,7 @@
 package MyApp.kiosk;
 
 import MyApp.building.Building;
+import MyApp.misc.Msg;
 import MyApp.misc.RFID;
 import java.awt.EventQueue;
 
@@ -33,10 +34,10 @@ public class KioskPanel implements Panel{
 	private JTextField display;
 	private Building building;
 	private String[] floorList;
-	private String[] displayText;
+	protected String[] displayText;
 	private String[] RFIDlist;
 	private Kiosk kiosk;
-	private int kioskNum;
+	protected int kioskNum;
 	private RFID rfid;
 	@Override
 	public void showInfo() {
@@ -110,6 +111,7 @@ public class KioskPanel implements Panel{
 		FloorCbx.addActionListener (new ActionListener () {
 		    public void actionPerformed(ActionEvent e) {
 		    	kioskNum = Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString());
+		    	System.out.println(kioskNum); 
 		    	kiosk = (Kiosk) building.getThread("k" + kioskNum);
 		    }
 		});
@@ -117,7 +119,6 @@ public class KioskPanel implements Panel{
 		
 		//Text field for display keypad result
 		display = new JTextField();
-		display.setText(displayText[kioskNum]);
 		display.setBackground(Color.WHITE);
 		display.setHorizontalAlignment(SwingConstants.CENTER);
 		display.setEditable(false);
@@ -131,6 +132,7 @@ public class KioskPanel implements Panel{
 		display.setColumns(1);
 		ActionListener displayListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
+	        	displayText[kioskNum] = kiosk.getUpdate();
 	        	display.setText(displayText[kioskNum]);
 	        }
 	    };
@@ -175,7 +177,6 @@ public class KioskPanel implements Panel{
 		//update rfid list for ever minutes
 		ActionListener rfidUpdateListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
-	        	System.out.println("Refresh rfid database");
 	        	Arrays.fill(RFIDlist, null);
 	    		RFIDlist = rfid.getAllTheId().parallelStream().toArray(String[]::new);
 	        	RFIDCbx.removeAllItems();
@@ -183,7 +184,7 @@ public class KioskPanel implements Panel{
 	        		RFIDCbx.addItem(rf);
 	        }
 	    };
-	    Timer timer2 = new Timer(6000, rfidUpdateListener);
+	    Timer timer2 = new Timer(60000, rfidUpdateListener);
 	    timer2.start();
 	    
 		JButton btnSubmit = new JButton("Keypad Submit");
@@ -195,12 +196,8 @@ public class KioskPanel implements Panel{
 		gbc_btnSubmit.gridy = 5;
 		btnSubmit.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent e) { 
-				  if(Arrays.asList(floorList).contains(Keypadbox.getSelectedItem().toString())){
 				      building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk clicked submitFloor.");
-					  displayText[kioskNum] = kiosk.readKeypad(Keypadbox.getSelectedItem().toString() );
-				  }else{
-					  displayText[kioskNum] = "Wrong Floor Input, please try again.";
-				  }
+					  kiosk.readKeypad(Keypadbox.getSelectedItem().toString() );
 			  }
 		} );
 		panel.add(btnSubmit, gbc_btnSubmit);
@@ -215,7 +212,7 @@ public class KioskPanel implements Panel{
 		btnRfidSubmit.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent e) { 
 				  building.getLogger().log(Level.INFO, FloorCbx.getSelectedItem().toString() + "'s koisk pass RFID id " + RFIDCbx.getSelectedItem().toString());
-				  displayText[kioskNum] = kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
+				  kiosk.readRFID(RFIDCbx.getSelectedItem().toString());
 			  }
 		} );
 		
@@ -234,9 +231,8 @@ public class KioskPanel implements Panel{
 		panel.add(btnEE, gbc_btnEE);
 	}
 	
-	protected void updateDisplay(String text){
-		displayText[kioskNum] = text;
-		System.out.println(displayText[kioskNum] + "/" + text);
-    	display.setText(displayText[kioskNum]);
-	}
+    public void run() {
+
+    	
+    }
 }

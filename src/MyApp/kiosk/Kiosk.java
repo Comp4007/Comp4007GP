@@ -4,6 +4,7 @@ import MyApp.building.Floor;
 import MyApp.elevator.Elevator;
 import MyApp.misc.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.logging.Level;
@@ -14,17 +15,18 @@ import MyApp.building.Building;
 public class Kiosk extends AppThread implements Comparable<Kiosk> {
     public static int kioskCount = 0;
     private int kioskid;
-    private KioskPanel kp;
     private Floor floor;
+	private String[] floorList;
     private RFID rfid;
+    private String kioskUpdate = "";
 
     private HashMap<Elevator, LinkedHashSet<Floor>> awaitingDestinations = new HashMap<>();
 
     public Kiosk(String id, Building building, Floor floor) {
         super(id, building);
+        floorList = building.getFloorNames();
         this.floor = floor;
         kioskid = kioskCount++;
-        kp = new KioskPanel(building);
         rfid = new RFID();
     }
 
@@ -42,22 +44,22 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
      * @param target
      * @return
      */
-    public String addRequest(String target) {
+    public void addRequest(String target) {
         // String elevatorID = building.getResult(target, id);
         Elevator assignedTo = null;
         try {
             assignedTo = this.building.putNewHopRequest(this, target);
         } catch (IndexOutOfBoundsException e) {
-            return "Error! please try again!";
+        	kioskUpdate = "Error! please try again!";
         }
 
         if (assignedTo == null) {
             log.info(String.format("cannot assign for target %s", target));
-            return "Assigned not success.";
+            kioskUpdate = "Assigned not success.";
         } else {
             log.info(String.format("Floor \"%s\" request assigned to elevator %d", target, assignedTo.getElevatorId()));
             putNewElevatorDestination(assignedTo, building.getFloorPosition(target));
-            return "Floor" + target + " request assigned to elevator " + assignedTo.getID();
+            kioskUpdate = "Floor" + target + " request assigned to elevator " + assignedTo.getID();
         }
     }
 
@@ -78,29 +80,35 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         floors.add(dest);
     }
 
-    protected String readKeypad(String destFloor) {
-        return addRequest(destFloor);
+    protected void readKeypad(String destFloor) {
+        if(Arrays.asList(floorList).contains(destFloor)){
+        	building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %s, dest = %s", id, destFloor));
+        	addRequest(destFloor);//dummy
+        }else{
+        	kioskUpdate = "Wrong ID, Please try again.";
+        }
+        addRequest(destFloor);
     }
 
-    protected String readRFID(String id) {
+    protected void readRFID(String id) {
         // TODO: rfid id to floor?
-    	System.out.println(id);
         String destFloor = rfid.getFloorById(id);
       
         if(destFloor != "na"){
         	building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %s, dest = %s", id, destFloor));
-        	return addRequest(destFloor);//dummy
+        	addRequest(destFloor);//dummy
         }else{
-        	return "Wrong ID, Please try again.";
+        	kioskUpdate = "Wrong ID, Please try again.";
         }
     }
 
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
-        System.
-        kp.updateDisplay("Door open", kioskid);
+        System.out.println("Door open/" + kioskid);
+        kioskUpdate = "Door open";
         //TODO search if any elevator is arrived
         finishHopRequest();
+        kioskUpdate = "Door close";
     }
 
     public HashMap<Elevator, LinkedHashSet<Floor>> getDestinationQueue() {
@@ -133,4 +141,14 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
     public int compareTo(Kiosk o) {
         return this.getID().compareTo(o.getID());
     }
+
+	public String getUpdate() {
+		// TODO Auto-generated method stub
+		return kioskUpdate;
+	}
+	
+	public void setUpdate(String text) {
+		// TODO Auto-generated method stub
+		kioskUpdate = text;
+	}
 }
