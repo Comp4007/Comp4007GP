@@ -1,44 +1,54 @@
 package MyApp.panel;
 
 import java.awt.EventQueue;
-
 import java.awt.Color;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.CopyOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
-
-import MyApp.building.Building;
 import MyApp.misc.RFID;
-
 import javax.swing.JLabel;
 
 public class AdminPanel implements Panel{
+	/**
+	 * GUI frame
+	 */
 	private JFrame frame;
+	/**
+	 * This is a table show RFID data on the frame
+	 */
 	private JTable table;
+	/**
+	 * It is store all the RFID in database
+	 */
 	private String[] flrList;
+	/**
+	 * Set the RFID database path
+	 */
 	private final String dbFName = "etc/RFID_DB";
-	
+	/**
+	 * Set the RFID class object
+	 */
 	private final RFID rf = new RFID();
+	/**
+	 * This for user click the row data then store here
+	 */
+	private String idCheck;
 
 	public AdminPanel(String[] flrList){
 		this.flrList = flrList;
 		initialize();
 	}
 	
+	/**
+	 * Building can use this method to open the admin panel
+	 */
 	@Override
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
@@ -188,6 +198,7 @@ public class AdminPanel implements Panel{
         		int i = table.getSelectedRow();
             
             	textId.setText(model.getValueAt(i, 0).toString());
+            	idCheck = textId.getText();
             	textFname.setText(model.getValueAt(i, 1).toString());
             	textLname.setText(model.getValueAt(i, 2).toString());
             	textAge.setText(model.getValueAt(i, 3).toString());
@@ -223,7 +234,7 @@ public class AdminPanel implements Panel{
 
             @Override
             public void actionPerformed(ActionEvent e) {
-             
+             if(idCheck.equals(textId.getText())){
                 // i = the index of the selected row
                 int i = table.getSelectedRow();
                 String line = "";
@@ -243,6 +254,9 @@ public class AdminPanel implements Panel{
                     System.out.println("Update Error");
                     lblErrorDisplay.setText("Update Error");
                 }
+             }else{
+            	 lblErrorDisplay.setText("Cannot update id because it is unique");
+             }
             }
         });
         
