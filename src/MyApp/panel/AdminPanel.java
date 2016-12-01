@@ -6,6 +6,12 @@ import java.awt.Color;
 import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -103,18 +109,18 @@ public class AdminPanel implements Panel{
         JButton btnUpdate = new JButton("Update");     
         
         // Layout 
-        textId.setBounds(449, 44, 167, 25);
-        textFname.setBounds(449, 102, 167, 25);
-        textLname.setBounds(449, 160, 167, 25);
-        textAge.setBounds(449, 217, 167, 25);
+        textId.setBounds(591, 44, 295, 25);
+        textFname.setBounds(591, 102, 295, 25);
+        textLname.setBounds(591, 160, 295, 25);
+        textAge.setBounds(591, 217, 295, 25);
         
-        btnAdd.setBounds(349, 381, 100, 25);
-        btnUpdate.setBounds(449, 381, 100, 25);
-        btnDelete.setBounds(548, 381, 100, 25);
+        btnAdd.setBounds(488, 381, 100, 25);
+        btnUpdate.setBounds(587, 381, 100, 25);
+        btnDelete.setBounds(687, 381, 100, 25);
         
         // create JScrollPane
         JScrollPane pane = new JScrollPane(table);
-        pane.setBounds(0, 0, 348, 412);
+        pane.setBounds(0, 0, 476, 412);
         
         frame.getContentPane().setLayout(null);
         
@@ -133,19 +139,19 @@ public class AdminPanel implements Panel{
         
         // add JLabel to the jframe
         JLabel lblId = new JLabel("ID:");
-        lblId.setBounds(383, 49, 61, 16);
+        lblId.setBounds(500, 49, 61, 16);
         frame.getContentPane().add(lblId);
         
         JLabel lblNewLabel = new JLabel("Floor:");
-        lblNewLabel.setBounds(383, 107, 61, 16);
+        lblNewLabel.setBounds(500, 107, 61, 16);
         frame.getContentPane().add(lblNewLabel);
         
         JLabel lblNewLabel_1 = new JLabel("FName:");
-        lblNewLabel_1.setBounds(383, 165, 61, 16);
+        lblNewLabel_1.setBounds(500, 165, 61, 16);
         frame.getContentPane().add(lblNewLabel_1);
         
         JLabel lblNewLabel_2 = new JLabel("LName:");
-        lblNewLabel_2.setBounds(383, 222, 61, 16);
+        lblNewLabel_2.setBounds(500, 222, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
         JButton btnCancel = new JButton("Cancel");
@@ -157,12 +163,16 @@ public class AdminPanel implements Panel{
             	textAge.setText("");
         	}
         });
-        btnCancel.setBounds(349, 353, 299, 23);
+        btnCancel.setBounds(488, 346, 413, 23);
         frame.getContentPane().add(btnCancel);
         
         JLabel lblErrorDisplay = new JLabel();
-        lblErrorDisplay.setBounds(358, 328, 289, 14);
+        lblErrorDisplay.setBounds(498, 318, 289, 14);
         frame.getContentPane().add(lblErrorDisplay);
+        
+        JButton btnBackup = new JButton("Backup");
+        btnBackup.setBounds(784, 379, 117, 29);
+        frame.getContentPane().add(btnBackup);
         
         
         // create an array of objects to set the row data
@@ -257,9 +267,30 @@ public class AdminPanel implements Panel{
             }
         });
         
+        btnBackup.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            	try{
+            		Path FROM = Paths.get("etc/RFID_DB");
+            	    Path TO = Paths.get("etc/RFID_Backup");
+            	  //overwrite existing file, if exists
+            	    CopyOption[] options = new CopyOption[]{
+            	      StandardCopyOption.REPLACE_EXISTING,
+            	      StandardCopyOption.COPY_ATTRIBUTES
+            	    }; 
+            		Files.copy(FROM,TO,options);
+            		System.out.println("Backup sucessfully");
+            	}catch(Exception ex){
+            		System.out.println("Cannot back up the data from database");
+            	}
+            
+            }
+        });
+        
         //jframe property
         frame.setTitle("RFID Admin Panel");
-        frame.setSize(673,452);
+        frame.setSize(913,452);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
