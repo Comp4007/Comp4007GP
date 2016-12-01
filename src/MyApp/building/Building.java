@@ -23,8 +23,6 @@ import MyApp.timer.Timer;
 
 import static java.util.stream.Collectors.toMap;
 
-// TODO: FUCK YOU! MORE COMMENTS IN CODES, NOT JUST JAVADOCS, LAZY SOUMA!
-
 /**
  * Simulates all functionality of startElevatorStatusCacheThread centralised controller inside startElevatorStatusCacheThread building. <br/>
  * This may be used as entry point for simulation.
@@ -73,8 +71,7 @@ public class Building {
      */
     private Properties cfgProps = null;
     /**
-     * Holds the thread that refreshes the cache of statuses of all elevators.<br/>
-     * Note that using FixedThreadPool to reduce resource and time overheads for the cache refresher to run.
+     * Holds the thread that refreshes the cache of statuses of all elevators.
      */
     private Thread threadBuildingRefreshElevatorStatusCache;
 
@@ -246,6 +243,9 @@ public class Building {
      * Ensures that the elevator status cache thread is running. Create new thread if not exist or not alive.
      */
     private void startElevatorStatusCacheThread() {
+        if (this.threadBuildingRefreshElevatorStatusCache != null && this.threadBuildingRefreshElevatorStatusCache.isAlive())
+            return;
+
         this.threadBuildingRefreshElevatorStatusCache = new Thread(() -> {
             while (true) {
                 Collection<Elevator> elevators = this.getThreads(Elevator.class);
@@ -312,6 +312,10 @@ public class Building {
         return this.kiosks.get(floor);
     }
 
+    /**
+     * Get all kiosks that is instantiated automatically by this {@code Building} instance.
+     * @return A {@code Collection} of {@code Kiosk}s that belongs to this {@code Building}.
+     */
     public Collection<Kiosk> getKiosks() {
         return this.kiosks.values();
     }
@@ -326,45 +330,12 @@ public class Building {
         return cfgProps.getProperty(property);
     }
 
+    /**
+     * Get all elevators that is instantiated automatically by this {@code Building} instance.
+     * @return A {@code Collection} of {@code Elevator}s that belongs to this {@code Building}.
+     */
     public Collection<Elevator> getElevators() {
         return this.getThreads(Elevator.class);
-    }
-
-    /**
-     * Returns the status of elevators queues in startElevatorStatusCacheThread textual format for user to see.
-     *
-     * @return A string representation of the status of the elevators queues.
-     * @see ControlPanel
-     */
-    public String getElevatorQueueString() {
-        String geq = "";
-
-        for (Elevator e : getThreads(Elevator.class)) {
-            geq += "Elevator " + e.getID() + ": " + e.getQueue() + "\n";
-        }
-        return geq;
-    }
-
-    /**
-     * Returns the status of kiosk queue in startElevatorStatusCacheThread textual format for user to see.
-     *
-     * @return A string representation of the status of the kiosk queue.
-     * @see ControlPanel
-     */
-    public String getKioskQueueString() {
-        String gkq = "";
-
-        for (int i = 0; i < Kiosk.kioskCount; i++) {
-            HashMap<Integer, String> rq = this.getThread("k" + i).getQueue();
-            // demo of how to get queue of kiosk, 
-            // can also use this to get queue of elevator
-            gkq += "Floor " + i + ": " + rq + "\n";
-        }
-
-        // ElevatorStatus status = ((Elevator)(this.getThread("e" + 1))).getStatus();
-        // Algorithm stuff
-
-        return gkq;
     }
 
     // TODO: remove if wasting space
@@ -372,7 +343,7 @@ public class Building {
     /**
      * Get all statuses of different elevators accordingly.
      *
-     * @return An array list of elevator statuses.
+     * @return A {@code Collection} of {@code ElevatorStatus}es.
      */
     public Collection<ElevatorStatus> getElevatorStatus() {
         return this.elevatorsStatuses.values();
@@ -458,7 +429,12 @@ public class Building {
         return null;
     }
 
-    public Collection<Elevator> getDestinationsFromElevator(Floor floor) {
+    /**
+     * Get all docked {@code Elevator}s from specified {@code Floor}.
+     * @param floor The specified {@code Floor} to find.
+     * @return A {@code Collection} of {@code Elevator}s that is docked on that {@code Floor}.
+     */
+    public Collection<Elevator> getDockedElevatorsFromFloor(Floor floor) {
         LinkedList<Elevator> elevators = new LinkedList<>();
 
         for (Elevator e : getElevators()) {
