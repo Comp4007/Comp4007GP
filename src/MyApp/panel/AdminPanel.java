@@ -148,8 +148,8 @@ public class AdminPanel implements Panel{
         lblNewLabel_2.setBounds(383, 222, 61, 16);
         frame.getContentPane().add(lblNewLabel_2);
         
-        JButton btnCencel = new JButton("Cencel");
-        btnCencel.addActionListener(new ActionListener() {
+        JButton btnCancel = new JButton("Cancel");
+        btnCancel.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent arg0) {
             	textId.setText("");
             	textFname.setText("");
@@ -157,8 +157,8 @@ public class AdminPanel implements Panel{
             	textAge.setText("");
         	}
         });
-        btnCencel.setBounds(349, 353, 299, 23);
-        frame.getContentPane().add(btnCencel);
+        btnCancel.setBounds(349, 353, 299, 23);
+        frame.getContentPane().add(btnCancel);
         
         JLabel lblErrorDisplay = new JLabel();
         lblErrorDisplay.setBounds(358, 328, 289, 14);
