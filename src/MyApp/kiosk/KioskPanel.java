@@ -111,7 +111,6 @@ public class KioskPanel implements Panel{
 		FloorCbx.addActionListener (new ActionListener () {
 		    public void actionPerformed(ActionEvent e) {
 		    	kioskNum = Arrays.asList(floorList).indexOf(FloorCbx.getSelectedItem().toString());
-		    	System.out.println(kioskNum); 
 		    	kiosk = (Kiosk) building.getThread("k" + kioskNum);
 		    }
 		});
