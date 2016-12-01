@@ -40,6 +40,10 @@ public class KioskPanel implements Panel{
 	protected int kioskNum;
 	private RFID rfid;
 	@Override
+	
+	/**
+	 * Display GUI
+	 */
 	public void showInfo() {
 		EventQueue.invokeLater(() -> {
             try {
@@ -50,7 +54,9 @@ public class KioskPanel implements Panel{
         });
 	}
 	
-
+	/**
+	 * Close windows when other windows is closed 
+	 */
 	public void dismissInfo() {
 		EventQueue.invokeLater(() -> {
 			try {
@@ -101,7 +107,7 @@ public class KioskPanel implements Panel{
 		gbc_lblNewLabel.gridy = 0;
 		panel.add(lblNewLabel, gbc_lblNewLabel);
 	
-		//floor combobox
+		//floor ComboBox to choose use what floor's koisk
 		JComboBox FloorCbx = new JComboBox(floorList);
 		GridBagConstraints gbc_FloorCbx = new GridBagConstraints();
 		gbc_FloorCbx.fill = GridBagConstraints.HORIZONTAL;
@@ -116,7 +122,7 @@ public class KioskPanel implements Panel{
 		});
 		panel.add(FloorCbx, gbc_FloorCbx);
 		
-		//Text field for display keypad result
+		//Text field for display Kiosk Information
 		display = new JTextField();
 		display.setBackground(Color.WHITE);
 		display.setHorizontalAlignment(SwingConstants.CENTER);
@@ -129,6 +135,7 @@ public class KioskPanel implements Panel{
 		gbc_display.gridy = 1;
 		panel.add(display, gbc_display);
 		display.setColumns(1);
+		//Auto update
 		ActionListener displayListener = new ActionListener() {
 	        public void actionPerformed(ActionEvent actionEvent) {
 	        	displayText[kioskNum] = kiosk.getUpdate();
@@ -153,6 +160,7 @@ public class KioskPanel implements Panel{
 		gbc_lblRfidReader.gridy = 3;
 		panel.add(lblRfidReader, gbc_lblRfidReader);
 
+		//Keypad
 		JComboBox Keypadbox = new JComboBox(floorList);
 		Keypadbox.setEditable(true);
 		GridBagConstraints gbc_Keypadbox = new GridBagConstraints();
@@ -162,8 +170,7 @@ public class KioskPanel implements Panel{
 		gbc_Keypadbox.gridx = 0;
 		gbc_Keypadbox.gridy = 4;
 		panel.add(Keypadbox, gbc_Keypadbox);
-		//=================================================================
-		
+	
 		//RFID reader
 		JComboBox RFIDCbx = new JComboBox(RFIDlist);
 		RFIDCbx.setEditable(true);
@@ -186,6 +193,7 @@ public class KioskPanel implements Panel{
 	    Timer timer2 = new Timer(60000, rfidUpdateListener);
 	    timer2.start();
 	    
+	    //Keypad Submit button
 		JButton btnSubmit = new JButton("Keypad Submit");
 		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
 		gbc_btnSubmit.gridwidth = 2;
@@ -201,6 +209,7 @@ public class KioskPanel implements Panel{
 		} );
 		panel.add(btnSubmit, gbc_btnSubmit);
 		
+		//RFID Submit button
 		JButton btnRfidSubmit = new JButton("RFID Submit");
 		GridBagConstraints gbc_btnRfidSubmit = new GridBagConstraints();
 		gbc_btnRfidSubmit.insets = new Insets(0, 0, 5, 0);
@@ -215,6 +224,7 @@ public class KioskPanel implements Panel{
 			  }
 		} );
 		
+		//Enter Elevator button
 		JButton btnEE = new JButton("Enter elevator");
 		GridBagConstraints gbc_btnEE = new GridBagConstraints();
 		gbc_btnEE.fill = GridBagConstraints.BOTH;
@@ -229,9 +239,4 @@ public class KioskPanel implements Panel{
 		} );
 		panel.add(btnEE, gbc_btnEE);
 	}
-	
-    public void run() {
-
-    	
-    }
 }

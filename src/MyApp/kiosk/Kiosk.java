@@ -29,18 +29,25 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         kioskid = kioskCount++;
         rfid = new RFID();
     }
-
+    
+    /**
+     * Get floor of koisk
+     * @return
+     */
     public Floor getFloor() {
         return floor;
     }
 
-
+    /**
+     * Set floor of koisk
+     * @return
+     */
     public void setFloor(Floor floor) {
         this.floor = floor;
     }
 
     /**
-     * 
+     * Add Destination floor request
      * @param target
      * @return
      */
@@ -55,18 +62,18 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
 
         if (assignedTo == null) {
             log.info(String.format("cannot assign for target %s", target));
-            kioskUpdate = "Assigned not success.";
+            kioskUpdate = "Assigne not successful.";
         } else {
             log.info(String.format("Floor \"%s\" request assigned to elevator %d", target, assignedTo.getElevatorId()));
             putNewElevatorDestination(assignedTo, building.getFloorPosition(target));
-            kioskUpdate = "Floor" + target + " request assigned to elevator " + assignedTo.getID();
+            kioskUpdate = "Floor " + target + " request assigned to elevator " + assignedTo.getID();
         }
     }
 
     /**
-     * 
-     * @param e
-     * @param dest
+     * add request to the 
+     * @param e Elevator
+     * @param dest Floor
      */
     private void putNewElevatorDestination(Elevator e, Floor dest) {
         LinkedHashSet<Floor> floors;
@@ -79,7 +86,11 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
 
         floors.add(dest);
     }
-
+    
+    /**
+     * Get the keypad input and add request in waiting list
+     * @param destFloor
+     */
     protected void readKeypad(String destFloor) {
         if(Arrays.asList(floorList).contains(destFloor)){
         	building.getLogger().log(Level.INFO, String.format("read keypad, nfc id = %s, dest = %s", id, destFloor));
@@ -90,8 +101,11 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         addRequest(destFloor);
     }
 
+    /**
+     * Get the rfid reader input and add request in waiting list
+     * @param destFloor
+     */
     protected void readRFID(String id) {
-        // TODO: rfid id to floor?
         String destFloor = rfid.getFloorById(id);
       
         if(destFloor != "na"){
@@ -102,6 +116,9 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         }
     }
 
+    /**
+     * 
+     */
     protected void elevatorIn() {
         building.getLogger().log(Level.INFO, "Floor " + floor.getName() + "Enter elevator arrived");
         System.out.println("Door open/" + kioskid);
@@ -110,6 +127,10 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         finishHopRequest();
     }
 
+    /**
+     * 
+     * @return awaitingDestinations
+     */
     public HashMap<Elevator, LinkedHashSet<Floor>> getDestinationQueue() {
         return this.awaitingDestinations;
     }
@@ -126,6 +147,9 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
     	
     }
 
+    /**
+     * 
+     */
     public void run() {
         //create GUI with RFID/keypad input
         Msg msg = mbox.receive();
@@ -139,10 +163,18 @@ public class Kiosk extends AppThread implements Comparable<Kiosk> {
         return this.getID().compareTo(o.getID());
     }
 
+    /**
+     * Get kiosk update information for panel to update
+     * @return 
+     */
 	public String getUpdate() {
 		return kioskUpdate;
 	}
 	
+	/**
+	 * Update kiosk information 
+	 * @param text
+	 */
 	public void setUpdate(String text) {
 		kioskUpdate = text;
 	}
