@@ -66,10 +66,9 @@ public class RFID {
         	    PrintWriter out = new PrintWriter(bw))
         	{ 
         	    out.println(data);
-        	    System.out.println("Insert data sucessfully");
-        	    fw.close();
         	    bw.close();
         	    out.close();
+        	    System.out.println("Insert data sucessfully");
         	} catch (IOException ex) {
         	    System.out.println("Data cannot insert to the databse.");
         	}
@@ -132,7 +131,7 @@ public class RFID {
         writer.close(); 
         reader.close(); 
         boolean successful = tempFile.renameTo(inputFile);
-        System.out.println("Delete data sucessfully " + successful);
+        System.out.println("Delete data " + successful);
         }catch (Exception ex){
         	System.out.println("Delete Error");
         }
