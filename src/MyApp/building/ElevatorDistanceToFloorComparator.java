@@ -29,9 +29,9 @@ class ElevatorStatusDistanceToFloorComparator implements Comparator<ElevatorStat
         int requestDirection = goingUp ? 1 : -1;
         if (o1.getServingDirection() == o2.getServingDirection()) {
             resultDirection = 0;
-        } else if (o1.getServingDirection() == requestDirection) {
+        } else if (o1.getServingDirection() != -requestDirection) { // same or elevator is still
             resultDirection = -1;
-        } else if (o2.getServingDirection() == requestDirection) {
+        } else if (o2.getServingDirection() != -requestDirection) { // same or elevator is still
             resultDirection = 1;
         }
         if (resultDirection != 0)
